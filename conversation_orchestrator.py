@@ -229,6 +229,38 @@ class ConversationOrchestrator:
                         value=canonical,
                     )
 
+        if interpretation.action == SemanticAction.CHANGE_FIELD:
+            allowed_values = self._allowed_values_for_field(
+                context,
+                interpretation.field_name,
+            )
+
+            if allowed_values:
+                canonical = self._canonical_allowed_value(
+                    interpretation.value,
+                    allowed_values,
+                )
+
+                if canonical is None:
+                    return (
+                        interpretation,
+                        ConversationEvent(
+                            type=EventType.INVALID_FIELD_VALUE,
+                            field=interpretation.field_name,
+                            value=interpretation.value,
+                            metadata={
+                                "source": "python_catalogue_guard",
+                                "allowed_values": list(allowed_values),
+                            },
+                        ),
+                    )
+
+                if canonical != interpretation.value:
+                    interpretation = replace(
+                        interpretation,
+                        value=canonical,
+                    )
+
         if interpretation.action == SemanticAction.SWITCH_PACKAGE:
             allowed_packages = self._packages_for_current_service(context)
 
@@ -506,6 +538,41 @@ class ConversationOrchestrator:
         event: ConversationEvent,
         transition: TransitionResult,
     ) -> ResponsePlan:
+        plan = self._plan_response_base(
+            context=context,
+            interpretation=interpretation,
+            event=event,
+            transition=transition,
+        )
+
+        # A customer who asks to change something has to be told what
+        # happened to it. Without this the bot silently repeats the next
+        # question, which reads as being ignored.
+        if event.type == EventType.CHANGE_FIELD:
+            plan = replace(
+                plan,
+                metadata={
+                    **plan.metadata,
+                    "changed_field": event.field,
+                    "changed_value": context.quote.get(
+                        event.field
+                    ),
+                    "change_applied": bool(
+                        transition.changed_fields
+                    ),
+                },
+            )
+
+        return plan
+
+    def _plan_response_base(
+        self,
+        *,
+        context: ConversationContext,
+        interpretation: SemanticInterpretation | None,
+        event: ConversationEvent,
+        transition: TransitionResult,
+    ) -> ResponsePlan:
         language = (
             interpretation.language
             if interpretation
@@ -582,6 +649,32 @@ class ConversationOrchestrator:
                 language=language,
                 metadata={
                     "rejected_value": event.value,
+                    "rejected_field": (
+                        event.field
+                        or context.expected_field()
+                    ),
+                    "rejected_options":
+                        self._allowed_values_for_field(
+                            context,
+                            event.field
+                            or context.expected_field(),
+                        ),
+                },
+            )
+
+        if event.type == EventType.STATUS_QUESTION:
+            return ResponsePlan(
+                action=ResponseAction.ANSWER_STATUS,
+                state=context.state,
+                next_field=context.expected_field(),
+                options=self._allowed_values(
+                    context
+                ),
+                current_package=context.quote.package,
+                language=language,
+                metadata={
+                    "quote_summary":
+                        context.quote.as_dict(),
                 },
             )
 
@@ -971,6 +1064,44 @@ class ConversationOrchestrator:
                 [],
             )
         )
+
+    def _allowed_values_for_field(
+        self,
+        context: ConversationContext,
+        field_name: str | None,
+    ) -> list[str]:
+        """
+        Allowed values for a NAMED field.
+
+        _allowed_values() answers for the state's expected field. A
+        CHANGE_FIELD can target a field the state is not currently asking
+        for, so its validation has to key off the field, not the state.
+        """
+
+        if field_name == "service":
+            return list(
+                self.supported_services
+            )
+
+        if field_name == "package":
+            return self._packages_for_current_service(
+                context
+            )
+
+        if field_name == "coverage_type":
+            return [
+                "Photography",
+                "Videography",
+                "Both",
+            ]
+
+        if field_name == "travel_required":
+            return [
+                "Yes",
+                "No",
+            ]
+
+        return []
 
     def _allowed_values(
         self,

@@ -315,6 +315,20 @@ class ConversationStateMachine:
                 previous_state,
             )
 
+        if event.type == EventType.STATUS_QUESTION:
+            # A question about the current quote is read-only. Answering it
+            # must never move the conversation or reopen a decision.
+            return self._result(
+                context,
+                previous_state,
+                event,
+                [],
+                note=(
+                    "Answered a question about current quote state; "
+                    "state unchanged."
+                ),
+            )
+
         if event.type == EventType.PAUSE:
             return self._result(
                 context,

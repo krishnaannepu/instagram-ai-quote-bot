@@ -244,6 +244,16 @@ class EventNormalizer:
                 ),
             )
 
+        if action == SemanticAction.STATUS_QUESTION:
+            return ConversationEvent(
+                type=EventType.STATUS_QUESTION,
+                question_type=interpretation.question_type,
+                question_text=interpretation.question_text,
+                metadata=self._semantic_metadata(
+                    interpretation
+                ),
+            )
+
         if action == SemanticAction.PACKAGE_RECONSIDERATION:
             if not context.quote.package:
                 raise EventNormalizationError(

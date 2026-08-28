@@ -25,6 +25,26 @@ class RenderedMessage:
 
 
 class CustomerResponseRendererV3:
+    STATUS_FIELD_ORDER = (
+        "service",
+        "package",
+        "coverage_type",
+        "travel_required",
+        "duration_hours",
+        "event_date",
+        "location",
+    )
+
+    FIELD_LABELS = {
+        "service": "service",
+        "package": "package",
+        "coverage_type": "coverage",
+        "travel_required": "travel requirement",
+        "duration_hours": "coverage duration",
+        "event_date": "event date",
+        "location": "event location",
+    }
+
     FIELD_PROMPTS = {
         "service":
             "What type of service are you looking for?",
@@ -93,41 +113,68 @@ class CustomerResponseRendererV3:
                 ),
             )
 
+        if action == ResponseAction.ANSWER_STATUS:
+            summary = self._status_summary(
+                plan
+            )
+
+            prompt = self.FIELD_PROMPTS.get(
+                plan.next_field
+            )
+
+            text = (
+                f"{summary} {prompt}"
+                if prompt
+                else summary
+            )
+
+            return RenderedMessage(
+                text=text,
+                buttons=self._buttons_for_plan(
+                    plan
+                ),
+            )
+
         if action == ResponseAction.ASK_FIELD:
+            prompt = self.FIELD_PROMPTS.get(
+                plan.next_field,
+                "Please provide the next detail for your quote.",
+            )
+
             rejected_value = plan.metadata.get(
                 "rejected_value"
             )
 
             if rejected_value is not None:
-                allowed = ", ".join(
-                    plan.options
+                rejected_field = (
+                    plan.metadata.get(
+                        "rejected_field"
+                    )
+                    or plan.next_field
                 )
 
-                if plan.next_field == "package":
-                    text = (
-                        f"{rejected_value} is not an available package. "
-                        f"Please choose {allowed}."
+                allowed = ", ".join(
+                    plan.metadata.get(
+                        "rejected_options"
                     )
-                elif plan.next_field == "service":
-                    text = (
-                        f"{rejected_value} is not an available service. "
-                        f"Please choose {allowed}."
-                    )
-                elif plan.next_field == "coverage_type":
-                    text = (
-                        f"{rejected_value} is not a valid coverage option. "
-                        f"Please choose {allowed}."
-                    )
-                elif plan.next_field == "travel_required":
-                    text = (
-                        "Please answer Yes or No for whether travel "
-                        "is required."
-                    )
-                else:
-                    text = self.FIELD_PROMPTS.get(
-                        plan.next_field,
-                        "Please provide the next detail for your quote.",
-                    )
+                    or plan.options
+                )
+
+                text = self._rejection_text(
+                    field_name=rejected_field,
+                    value=rejected_value,
+                    allowed=allowed,
+                    fallback=prompt,
+                )
+
+                # A rejected change targets a field the conversation is not
+                # currently asking for. Say why it was rejected, then repeat
+                # the question the customer still needs to answer.
+                if (
+                    plan.next_field
+                    and rejected_field != plan.next_field
+                ):
+                    text = f"{text} {prompt}"
 
                 return RenderedMessage(
                     text=text,
@@ -136,11 +183,15 @@ class CustomerResponseRendererV3:
                     ),
                 )
 
+            confirmation = self._change_confirmation(
+                plan
+            )
+
+            if confirmation:
+                prompt = f"{confirmation} {prompt}"
+
             return RenderedMessage(
-                text=self.FIELD_PROMPTS.get(
-                    plan.next_field,
-                    "Please provide the next detail for your quote.",
-                ),
+                text=prompt,
                 buttons=self._buttons_for_plan(
                     plan
                 ),
@@ -603,6 +654,127 @@ class CustomerResponseRendererV3:
             text="\n".join(
                 lines
             )
+        )
+
+    def _status_summary(
+        self,
+        plan,
+    ) -> str:
+        """
+        Answer a question about the quote from what Python already holds.
+
+        The customer is asking what is recorded, not asking to change it,
+        so nothing here reopens a decision.
+        """
+
+        quote = plan.metadata.get(
+            "quote_summary"
+        ) or {}
+
+        parts = []
+
+        for field_name in self.STATUS_FIELD_ORDER:
+            value = quote.get(
+                field_name
+            )
+
+            if value in (None, ""):
+                continue
+
+            label = self.FIELD_LABELS.get(
+                field_name,
+                field_name.replace("_", " "),
+            )
+
+            parts.append(
+                f"{label}: {value}"
+            )
+
+        if not parts:
+            return (
+                "We have not recorded any quote details yet."
+            )
+
+        return (
+            "Here is what I have on your quote so far - "
+            + ", ".join(parts)
+            + "."
+        )
+
+    def _rejection_text(
+        self,
+        *,
+        field_name: str | None,
+        value,
+        allowed: str,
+        fallback: str,
+    ) -> str:
+        if field_name == "package":
+            return (
+                f"{value} is not an available package. "
+                f"Please choose {allowed}."
+            )
+
+        if field_name == "service":
+            return (
+                f"{value} is not an available service. "
+                f"Please choose {allowed}."
+            )
+
+        if field_name == "coverage_type":
+            return (
+                f"{value} is not a valid coverage option. "
+                f"Please choose {allowed}."
+            )
+
+        if field_name == "travel_required":
+            return (
+                "Please answer Yes or No for whether "
+                "travel is required."
+            )
+
+        return fallback
+
+    def _change_confirmation(
+        self,
+        plan,
+    ) -> str | None:
+        """
+        Tell the customer what happened to the change they asked for.
+
+        A no-op change is still an answer. Repeating the next question on
+        its own reads as the bot ignoring them.
+        """
+
+        changed_field = plan.metadata.get(
+            "changed_field"
+        )
+
+        if not changed_field:
+            return None
+
+        label = self.FIELD_LABELS.get(
+            changed_field,
+            str(changed_field).replace("_", " "),
+        )
+
+        value = plan.metadata.get(
+            "changed_value"
+        )
+
+        if value in (None, ""):
+            return None
+
+        if plan.metadata.get(
+            "change_applied"
+        ):
+            return (
+                f"Done, your {label} is now {value}."
+            )
+
+        return (
+            f"Your {label} is already {value}, "
+            f"so nothing has changed."
         )
 
     def _buttons_for_plan(

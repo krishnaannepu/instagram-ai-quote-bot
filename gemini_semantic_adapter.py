@@ -237,6 +237,18 @@ Examples:
 - any discounts?
 - how do payments work?
 
+STATUS_QUESTION
+Use when the customer asks what is currently recorded on their own quote,
+rather than asking about the business or about package differences.
+Examples:
+- which package am I in?
+- what package did I choose?
+- what have you got so far?
+- what are my current details?
+- did I say Both?
+A status question is read-only. It is never PACKAGE_RECONSIDERATION, because
+the customer is asking what is already selected, not asking to reconsider it.
+
 6. PACKAGE_RECONSIDERATION
 Use when:
 - a package is already selected, AND
@@ -246,6 +258,8 @@ Use when:
 
 Important:
 A package named inside a question is NOT automatically a package selection.
+A question asking which package is currently selected is STATUS_QUESTION,
+not PACKAGE_RECONSIDERATION.
 
 7. KEEP_CURRENT_PACKAGE / SWITCH_PACKAGE
 Use only in PACKAGE_RECONFIRMATION.

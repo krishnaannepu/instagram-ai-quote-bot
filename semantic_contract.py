@@ -14,6 +14,7 @@ class SemanticAction(str, Enum):
     CHANGE_FIELD = "CHANGE_FIELD"
 
     BUSINESS_QUESTION = "BUSINESS_QUESTION"
+    STATUS_QUESTION = "STATUS_QUESTION"
 
     PACKAGE_RECONSIDERATION = "PACKAGE_RECONSIDERATION"
     KEEP_CURRENT_PACKAGE = "KEEP_CURRENT_PACKAGE"
@@ -57,6 +58,7 @@ QUOTE_FIELD_ACTIONS = {
     SemanticAction.FIELD_VALUE,
     SemanticAction.CHANGE_FIELD,
     SemanticAction.BUSINESS_QUESTION,
+    SemanticAction.STATUS_QUESTION,
     SemanticAction.PACKAGE_RECONSIDERATION,
     SemanticAction.SPEAK_TO_TEAM,
     SemanticAction.REQUEST_CALLBACK,
@@ -78,6 +80,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.QUOTE_SERVICE: {
         SemanticAction.FIELD_VALUE,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,
         SemanticAction.REQUEST_CALLBACK,
@@ -88,6 +91,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.QUOTE_PACKAGE: {
         SemanticAction.FIELD_VALUE,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,
         SemanticAction.REQUEST_CALLBACK,
@@ -121,6 +125,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.PACKAGE_RECONFIRMATION: {
         SemanticAction.KEEP_CURRENT_PACKAGE,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.SWITCH_PACKAGE,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,
@@ -141,6 +146,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.QUOTE_READY: {
         SemanticAction.CHANGE_FIELD,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.PACKAGE_RECONSIDERATION,
         SemanticAction.SPEAK_TO_TEAM,
@@ -175,6 +181,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.POST_QUOTE: {
         SemanticAction.CHANGE_FIELD,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.PACKAGE_RECONSIDERATION,
         SemanticAction.SPEAK_TO_TEAM,
