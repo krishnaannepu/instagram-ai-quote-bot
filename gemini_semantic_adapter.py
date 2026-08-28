@@ -551,9 +551,39 @@ Do not include explanations outside the JSON.
         )
 
         if action not in allowed_actions:
-            raise GeminiSemanticAdapterError(
-                f"Action {action.value} is not allowed "
-                f"while state is {context.state.value}."
+            # Gemini reached for an action Python does not permit here. That
+            # is a gap in STATE_ALLOWED_ACTIONS, not a customer error, so
+            # degrade to a clarification rather than failing the turn - a
+            # raised error reaches the customer as silence or an apology.
+            # Logged as its own event so gaps can be found and closed.
+            print(
+                json.dumps(
+                    {
+                        "severity": "WARNING",
+                        "message": "v3_contract_gap",
+                        "state": context.state.value,
+                        "returned_action": action.value,
+                        "allowed_actions": sorted(
+                            allowed.value
+                            for allowed in allowed_actions
+                        ),
+                        "field_name": raw.get("field_name"),
+                        "value": raw.get("value"),
+                    },
+                    ensure_ascii=False,
+                    default=str,
+                ),
+                flush=True,
+            )
+
+            return SemanticInterpretation(
+                action=SemanticAction.UNCLEAR,
+                language=raw.get("language") or "English",
+                confidence=0.0,
+                metadata={
+                    "contract_gap": True,
+                    "returned_action": action.value,
+                },
             )
 
         field_name = raw.get(

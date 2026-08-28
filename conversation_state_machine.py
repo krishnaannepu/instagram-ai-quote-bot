@@ -360,10 +360,26 @@ class ConversationStateMachine:
             )
 
         if event.type == EventType.CHANGE_FIELD:
+            expected_before = context.expected_field()
+
             changed = self._apply_change_field(
                 context,
                 event,
             )
+
+            # Answering the field the flow is currently waiting on has to move
+            # the conversation forward, whether the customer phrased it as an
+            # answer or as a correction. Otherwise the bot asks again for the
+            # thing it was just told.
+            if event.field == expected_before:
+                if context.reviewing_deferred:
+                    self._advance_deferred_review(
+                        context
+                    )
+                else:
+                    self._advance_standard_quote(
+                        context
+                    )
 
             return self._result(
                 context,

@@ -7,6 +7,7 @@ from typing import Protocol
 
 from conversation_events import ConversationEvent, EventType
 from conversation_models import (
+    QUOTE_FIELD_ORDER,
     QUOTE_STATE_TO_FIELD,
     ConversationContext,
     FlowState,
@@ -136,6 +137,11 @@ class ConversationOrchestrator:
                 )
             )
 
+            interpretation = self._auto_start_quote_if_needed(
+                context=context,
+                interpretation=interpretation,
+            )
+
             interpretation, guarded_event = self._guard_catalogue_value(
                 context=context,
                 interpretation=interpretation,
@@ -198,6 +204,46 @@ class ConversationOrchestrator:
     # Python catalogue/domain guard
     # ------------------------------------------------------------------
 
+    def _auto_start_quote_if_needed(
+        self,
+        *,
+        context: ConversationContext,
+        interpretation: SemanticInterpretation,
+    ) -> SemanticInterpretation:
+        """
+        A customer who opens with what they want should not have to tap a
+        button first.
+
+        Starting the quote here means the guard, the normalizer and the state
+        machine all see an ordinary quote turn instead of a value arriving in
+        a state that expects no field.
+        """
+
+        if context.state != FlowState.IDLE:
+            return interpretation
+
+        if interpretation.action not in {
+            SemanticAction.FIELD_VALUE,
+            SemanticAction.CHANGE_FIELD,
+        }:
+            return interpretation
+
+        if interpretation.field_name not in QUOTE_FIELD_ORDER:
+            return interpretation
+
+        context.reset_for_new_quote()
+
+        # They may have opened with a later detail ("8 hours for a wedding").
+        # Only the field the flow is actually asking for can take the
+        # expected-value path; anything else is applied as a change.
+        if interpretation.field_name != context.expected_field():
+            return replace(
+                interpretation,
+                action=SemanticAction.CHANGE_FIELD,
+            )
+
+        return interpretation
+
     def _guard_catalogue_value(
         self,
         *,
@@ -205,7 +251,15 @@ class ConversationOrchestrator:
         interpretation: SemanticInterpretation,
     ) -> tuple[SemanticInterpretation, ConversationEvent | None]:
         if interpretation.action == SemanticAction.FIELD_VALUE:
-            allowed_values = self._allowed_values(context)
+            # States that expect no field return nothing here, which
+            # would leave the value unvalidated. Fall back to the field.
+            allowed_values = (
+                self._allowed_values(context)
+                or self._allowed_values_for_field(
+                    context,
+                    interpretation.field_name,
+                )
+            )
 
             if allowed_values:
                 canonical = self._canonical_allowed_value(

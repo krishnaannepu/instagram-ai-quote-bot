@@ -11,6 +11,7 @@ SUITES = [
     "test_production_screenshot_regression_v3.py",
     "test_change_and_status_v3.py",
     "test_service_correction_v3.py",
+    "test_idle_entry_v3.py",
 ]
 
 failed = []

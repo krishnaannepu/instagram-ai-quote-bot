@@ -71,6 +71,9 @@ QUOTE_FIELD_ACTIONS = {
 STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
     FlowState.IDLE: {
         SemanticAction.GREETING,
+        SemanticAction.FIELD_VALUE,
+        SemanticAction.CHANGE_FIELD,
+        SemanticAction.STATUS_QUESTION,
         SemanticAction.START_NEW_QUOTE,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,
