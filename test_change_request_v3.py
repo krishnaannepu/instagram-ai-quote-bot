@@ -179,6 +179,84 @@ assert context.state == FlowState.QUOTE_COVERAGE, (
 print("PASS 7 - a multi-detail answer advances the flow and keeps the extras")
 
 
+# 8 -----------------------------------------------------------------
+# There is no two-field limit. Whatever the customer lists gets applied.
+for count, changes in (
+    (3, [
+        {"field_name": "package", "value": "Premium"},
+        {"field_name": "duration_hours", "value": 6},
+        {"field_name": "coverage_type", "value": "Photography"},
+    ]),
+    (4, [
+        {"field_name": "package", "value": "Premium"},
+        {"field_name": "duration_hours", "value": 6},
+        {"field_name": "coverage_type", "value": "Photography"},
+        {"field_name": "location", "value": "Bristol"},
+    ]),
+    (7, [
+        {"field_name": "service", "value": "Birthday"},
+        {"field_name": "package", "value": "Deluxe"},
+        {"field_name": "coverage_type", "value": "Videography"},
+        {"field_name": "travel_required", "value": "No"},
+        {"field_name": "duration_hours", "value": 3},
+        {"field_name": "event_date", "value": "1 Sept"},
+        {"field_name": "location", "value": "Cardiff"},
+    ]),
+):
+    orchestrator = build_orchestrator([gemini("CHANGE_FIELD", changes=changes)])
+    context = quoted_context(state=FlowState.POST_QUOTE)
+
+    orchestrator.handle_text(context=context, message_text=f"{count} changes")
+
+    for change in changes:
+        actual = context.quote.get(change["field_name"])
+        assert str(actual) == str(change["value"]), (
+            f"{count}-field message lost {change['field_name']}: "
+            f"expected {change['value']!r}, got {actual!r}"
+        )
+
+print("PASS 8 - 3, 4 and all 7 fields in one message are every one applied")
+
+
+# 9 -----------------------------------------------------------------
+# Changing the service and the package together. The package has to be
+# checked against the service being moved to, not the one being left.
+orchestrator = build_orchestrator([
+    gemini("CHANGE_FIELD", changes=[
+        {"field_name": "service", "value": "Birthday"},
+        {"field_name": "package", "value": "Deluxe"},
+    ]),
+])
+context = quoted_context(state=FlowState.POST_QUOTE)
+
+orchestrator.handle_text(context=context, message_text="birthday, deluxe package")
+
+assert context.quote.service == "Birthday"
+assert context.quote.package == "Deluxe", (
+    "Deluxe is a Birthday package and must not be judged against Wedding's"
+)
+print("PASS 9 - a package is validated against the service arriving with it")
+
+
+# 10 ----------------------------------------------------------------
+# Validation is not weakened by any of the above.
+orchestrator = build_orchestrator([
+    gemini("CHANGE_FIELD", changes=[
+        {"field_name": "duration_hours", "value": 5},
+        {"field_name": "package", "value": "Platinum"},
+    ]),
+])
+context = quoted_context(state=FlowState.POST_QUOTE)
+
+turn = orchestrator.handle_text(context=context, message_text="5 hours, platinum")
+confirmation = renderer._change_confirmation(turn.response_plan) or ""
+
+assert context.quote.duration_hours == 5
+assert context.quote.package == "Basic", "Platinum exists for no service"
+assert "Platinum" in confirmation
+print("PASS 10 - an invented value is still rejected and named")
+
+
 print()
 print("=" * 72)
 print("V3 CHANGE REQUEST REGRESSION PASSED")

@@ -236,6 +236,69 @@ assert not prompt_failures, (
 print(f"PASS - the prompt builds in all {len(list(FlowState))} states")
 
 
+# Every key the parser reads must appear in the response template the prompt
+# shows Gemini. That template says "exactly these keys", so a key described in
+# prose but missing from the template is a key Gemini will never send - which
+# is how "changes" was documented, parsed, tested, and still never arrived.
+import inspect
+import re
+
+parser_source = "".join(
+    inspect.getsource(getattr(GeminiSemanticAdapter, name))
+    for name in ("_parse_response_strict", "_parse_changes")
+)
+
+parsed_keys = set(
+    re.findall(
+        r'raw\.get\(\s*["\'](\w+)["\']',
+        parser_source,
+    )
+)
+
+reference_prompt = adapter.build_prompt(
+    SemanticRequest(
+        state=FlowState.POST_QUOTE,
+        expected_field=None,
+        message_text="package basic duration 6 hours",
+        allowed_values=[],
+        supported_services=["Wedding"],
+        packages_for_service=["Basic", "Premium"],
+        current_quote={"service": "Wedding"},
+        current_package="Basic",
+        deferred_fields=[],
+    )
+)
+
+# Only the JSON object itself counts. Prose below it describing a key is
+# exactly the mistake being guarded against: the template says "exactly these
+# keys", so a key that lives only in prose is a key Gemini will never send.
+template_start = reference_prompt.index("Return one JSON object")
+object_start = reference_prompt.index("{", template_start)
+object_end = reference_prompt.index("\n}", object_start)
+response_template = reference_prompt[object_start:object_end]
+
+undocumented = sorted(
+    key
+    for key in parsed_keys
+    if f'"{key}"' not in response_template
+)
+
+if undocumented:
+    print("keys the parser reads but the prompt never asks for:")
+    for key in undocumented:
+        print(f"  {key}")
+
+assert not undocumented, (
+    "every key the parser reads must be in the response template, "
+    "or Gemini will never send it"
+)
+
+print(
+    f"PASS - all {len(parsed_keys)} parsed keys appear in the response "
+    f"template Gemini is given"
+)
+
+
 print()
 print("=" * 72)
 print("V3 CONTRACT COVERAGE SWEEP PASSED")

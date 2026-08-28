@@ -375,12 +375,17 @@ Return one JSON object using exactly these keys:
   "action": "ONE_ALLOWED_ACTION",
   "field_name": null_or_string,
   "value": null_or_value,
+  "changes": list_of_field_value_objects_or_empty_list,
   "question_type": null_or_string,
   "question_text": null_or_string,
   "confidence": number_between_0_and_1,
   "language": "specific language label",
   "metadata": {{}}
 }}
+
+"changes" carries every quote field the message supplies when there is more
+than one. Leave it as [] when the message supplies one detail or none.
+Each entry is {{"field_name": "<quote field>", "value": <value>}}.
 
 Do not return Markdown.
 Do not include explanations outside the JSON.

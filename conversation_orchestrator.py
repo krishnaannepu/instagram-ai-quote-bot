@@ -364,13 +364,41 @@ class ConversationOrchestrator:
             accepted = []
             rejected = []
 
+            # One message can change the service and the package together.
+            # The package has to be checked against the service the customer
+            # is moving to, not the one they are leaving, or a valid package
+            # for the new service is rejected as unknown.
+            pending_service = None
+
+            for change in interpretation.changes:
+                if change["field_name"] != "service":
+                    continue
+
+                pending_service = self._canonical_allowed_value(
+                    change["value"],
+                    list(
+                        self.supported_services
+                    ),
+                )
+
             for change in interpretation.changes:
                 field_name = change["field_name"]
 
-                allowed_values = self._allowed_values_for_field(
-                    context,
-                    field_name,
-                )
+                if (
+                    field_name == "package"
+                    and pending_service
+                ):
+                    allowed_values = list(
+                        self.packages_by_service.get(
+                            pending_service,
+                            [],
+                        )
+                    )
+                else:
+                    allowed_values = self._allowed_values_for_field(
+                        context,
+                        field_name,
+                    )
 
                 if not allowed_values:
                     accepted.append(change)
