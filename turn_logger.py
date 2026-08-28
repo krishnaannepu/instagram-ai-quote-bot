@@ -39,8 +39,7 @@ def build_turn_log(
     """
     Build one structured turn record.
 
-    This does not persist anywhere yet. A later repository/logger can write
-    the returned dictionary to Cloud Logging, Firestore, or another sink.
+    Call emit_turn_log() to write the returned dictionary to Cloud Logging.
     """
 
     return {
@@ -166,4 +165,33 @@ def format_turn_log(
         ensure_ascii=False,
         indent=2,
         default=str,
+    )
+
+
+def emit_turn_log(
+    log_record: dict[str, Any],
+) -> None:
+    """
+    Write one structured turn record to stdout.
+
+    Cloud Run parses a single-line JSON object into jsonPayload, so each
+    customer turn becomes one queryable log entry:
+
+        gcloud logging read 'jsonPayload.message="v3_turn"' --limit 20
+
+    This is the record that answers "did Gemini or Python decide this?"
+    for a live Instagram conversation.
+    """
+
+    print(
+        json.dumps(
+            {
+                "severity": "INFO",
+                "message": "v3_turn",
+                "turn": log_record,
+            },
+            ensure_ascii=False,
+            default=str,
+        ),
+        flush=True,
     )

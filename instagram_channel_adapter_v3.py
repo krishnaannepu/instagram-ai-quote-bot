@@ -9,6 +9,7 @@ from meta_webhook_parser_v3 import (
     MetaWebhookParserV3,
 )
 from session_repository_v3 import SessionRepository
+from turn_logger import emit_turn_log
 
 
 @dataclass
@@ -109,6 +110,12 @@ class InstagramChannelAdapterV3:
                             or "",
                     )
                 )
+
+            # One structured record per customer turn: Gemini's raw
+            # interpretation, the Python event, and the state before/after.
+            emit_turn_log(
+                result.turn_log
+            )
 
             # Mark the message after successful runtime processing.
             if message_id:

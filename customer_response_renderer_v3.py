@@ -94,6 +94,48 @@ class CustomerResponseRendererV3:
             )
 
         if action == ResponseAction.ASK_FIELD:
+            rejected_value = plan.metadata.get(
+                "rejected_value"
+            )
+
+            if rejected_value is not None:
+                allowed = ", ".join(
+                    plan.options
+                )
+
+                if plan.next_field == "package":
+                    text = (
+                        f"{rejected_value} is not an available package. "
+                        f"Please choose {allowed}."
+                    )
+                elif plan.next_field == "service":
+                    text = (
+                        f"{rejected_value} is not an available service. "
+                        f"Please choose {allowed}."
+                    )
+                elif plan.next_field == "coverage_type":
+                    text = (
+                        f"{rejected_value} is not a valid coverage option. "
+                        f"Please choose {allowed}."
+                    )
+                elif plan.next_field == "travel_required":
+                    text = (
+                        "Please answer Yes or No for whether travel "
+                        "is required."
+                    )
+                else:
+                    text = self.FIELD_PROMPTS.get(
+                        plan.next_field,
+                        "Please provide the next detail for your quote.",
+                    )
+
+                return RenderedMessage(
+                    text=text,
+                    buttons=self._buttons_for_plan(
+                        plan
+                    ),
+                )
+
             return RenderedMessage(
                 text=self.FIELD_PROMPTS.get(
                     plan.next_field,
