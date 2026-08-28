@@ -20,6 +20,7 @@ from conversation_models import ConversationContext, FlowState
 from gemini_semantic_adapter import (
     GeminiSemanticAdapter,
     GeminiSemanticAdapterError,
+    SemanticRequest,
 )
 from semantic_contract import SemanticAction
 
@@ -185,6 +186,54 @@ print(
     f"PASS - {len(STATES) * len(PARTIAL)} incomplete/malformed responses "
     f"all handled without failing a turn"
 )
+
+
+# The prompt itself must build. It is an f-string, so a literal brace in an
+# example - a JSON snippet, say - turns into a format expression and every
+# text message fails at construction while buttons keep working.
+prompt_failures = []
+
+for state in FlowState:
+    context = ConversationContext()
+    context.state = state
+    context.quote.service = "Wedding"
+    context.quote.package = "Basic"
+
+    request = SemanticRequest(
+        state=state,
+        expected_field=context.expected_field(),
+        message_text="duration is 4 hrs coverage is photography",
+        allowed_values=["Basic", "Premium"],
+        supported_services=["Wedding", "Birthday"],
+        packages_for_service=["Basic", "Premium"],
+        current_quote=context.quote.as_dict(),
+        current_package="Basic",
+        deferred_fields=[],
+    )
+
+    try:
+        prompt = adapter.build_prompt(request)
+    except Exception as error:
+        prompt_failures.append(
+            (state.value, f"{type(error).__name__}: {error}")
+        )
+        continue
+
+    if '{"field_name": "duration_hours", "value": 4}' not in prompt:
+        prompt_failures.append(
+            (state.value, "the multi-field JSON example did not survive")
+        )
+
+if prompt_failures:
+    print(f"{len(prompt_failures)} states could not build a prompt:")
+    for state, message in prompt_failures:
+        print(f"  {state:24} {message}")
+
+assert not prompt_failures, (
+    "the prompt must build in every state with its examples intact"
+)
+
+print(f"PASS - the prompt builds in all {len(list(FlowState))} states")
 
 
 print()

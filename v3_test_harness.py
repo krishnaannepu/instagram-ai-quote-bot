@@ -12,7 +12,7 @@ production unnoticed. If a test double skips a gate, the gate is untested.
 
 from business_knowledge_adapter_v3 import BusinessKnowledgeAdapterV3
 from conversation_orchestrator import ConversationOrchestrator
-from gemini_semantic_adapter import GeminiSemanticAdapter
+from gemini_semantic_adapter import GeminiSemanticAdapter, SemanticRequest
 
 
 class FakeKnowledge:
@@ -63,6 +63,25 @@ class ScriptedAdapter(GeminiSemanticAdapter):
             raise AssertionError(
                 f"No scripted Gemini response remains for {message_text!r}"
             )
+
+        # Build the real prompt and throw it away. Only the network call is
+        # faked. Skipping this step is how a broken f-string in the prompt
+        # reached production while every suite stayed green.
+        self.build_prompt(
+            SemanticRequest(
+                state=context.state,
+                expected_field=context.expected_field(),
+                message_text=str(message_text or "").strip() or "hello",
+                allowed_values=list(kwargs.get("allowed_values") or []),
+                supported_services=list(kwargs.get("supported_services") or []),
+                packages_for_service=list(
+                    kwargs.get("packages_for_service") or []
+                ),
+                current_quote=context.quote.as_dict(),
+                current_package=context.quote.package,
+                deferred_fields=list(context.deferred_fields),
+            )
+        )
 
         return self.parse_response(
             context,

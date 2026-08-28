@@ -237,8 +237,8 @@ in a "changes" array, and set action to CHANGE_FIELD:
 
   "action": "CHANGE_FIELD",
   "changes": [
-    {"field_name": "duration_hours", "value": 4},
-    {"field_name": "coverage_type", "value": "Photography"}
+    {{"field_name": "duration_hours", "value": 4}},
+    {{"field_name": "coverage_type", "value": "Photography"}}
   ]
 
 Use field_name/value on their own only when there is exactly one detail.
