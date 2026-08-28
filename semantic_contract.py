@@ -80,6 +80,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.QUOTE_SERVICE: {
         SemanticAction.FIELD_VALUE,
+        SemanticAction.CHANGE_FIELD,
         SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,
@@ -91,6 +92,7 @@ STATE_ALLOWED_ACTIONS: dict[FlowState, set[SemanticAction]] = {
 
     FlowState.QUOTE_PACKAGE: {
         SemanticAction.FIELD_VALUE,
+        SemanticAction.CHANGE_FIELD,
         SemanticAction.STATUS_QUESTION,
         SemanticAction.BUSINESS_QUESTION,
         SemanticAction.SPEAK_TO_TEAM,

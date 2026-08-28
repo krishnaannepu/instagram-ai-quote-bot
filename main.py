@@ -447,19 +447,24 @@ def receive_instagram_message(
         )
 
     except Exception as error:
+        # Meta retries any non-2xx, which replays the same failing message.
+        # Individual turns are already handled inside the channel adapter,
+        # so reaching here means the payload itself could not be processed.
+        # Acknowledge it and log loudly rather than inviting a retry storm.
         print(
             "V3 webhook processing failed:",
             repr(
                 error
             ),
+            flush=True,
         )
 
-        raise HTTPException(
-            status_code=
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=
-                "Webhook processing failed.",
-        ) from error
+        return {
+            "status":
+                "error",
+            "conversation_engine":
+                "v3",
+        }
 
     return {
         "status":
@@ -468,6 +473,8 @@ def receive_instagram_message(
             result.processed_messages,
         "ignored_messages":
             result.ignored_messages,
+        "failed_messages":
+            result.failed_messages,
         "conversation_engine":
             "v3",
     }

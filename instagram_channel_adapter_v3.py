@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from customer_response_renderer_v3 import ButtonSpec, RenderedMessage
 from instagram_sender_v3 import InstagramSender
 from local_conversation_runtime_v3 import LocalConversationRuntimeV3
 from meta_webhook_parser_v3 import (
@@ -16,6 +17,7 @@ from turn_logger import emit_turn_log
 class WebhookProcessingResult:
     processed_messages: int
     ignored_messages: int
+    failed_messages: int = 0
 
 
 class InstagramChannelAdapterV3:
@@ -53,6 +55,7 @@ class InstagramChannelAdapterV3:
 
         processed = 0
         ignored = 0
+        failed = 0
 
         for incoming in messages:
             context = (
@@ -87,29 +90,74 @@ class InstagramChannelAdapterV3:
                 "last_message_id"
             ] = message_id
 
-            if (
-                incoming.type
-                == IncomingMessageType.TEXT
-            ):
-                result = (
-                    self.runtime
-                    .handle_text(
+            try:
+                if (
+                    incoming.type
+                    == IncomingMessageType.TEXT
+                ):
+                    result = (
+                        self.runtime
+                        .handle_text(
+                            context=context,
+                            message_text=
+                                incoming.text
+                                or "",
+                        )
+                    )
+                else:
+                    result = (
+                        self.runtime
+                        .handle_button(
+                            context=context,
+                            payload=
+                                incoming.button_payload
+                                or "",
+                        )
+                    )
+
+            except Exception as error:
+                # A failed turn must never reach the customer as silence.
+                # Log what we know, then say something human and move on.
+                failed += 1
+
+                emit_turn_log(
+                    self._failure_log(
+                        incoming=incoming,
                         context=context,
-                        message_text=
-                            incoming.text
-                            or "",
+                        error=error,
                     )
                 )
-            else:
-                result = (
-                    self.runtime
-                    .handle_button(
-                        context=context,
-                        payload=
-                            incoming.button_payload
-                            or "",
-                    )
+
+                self.sender.send_rendered(
+                    recipient_id=
+                        incoming.sender_id,
+                    message=RenderedMessage(
+                        text=(
+                            "Sorry, something went wrong on our side with "
+                            "that message. Could you try saying it a "
+                            "different way, or tap Speak to Team and "
+                            "someone will help you directly?"
+                        ),
+                        buttons=[
+                            ButtonSpec(
+                                label="Speak to Team",
+                                payload="SPEAK_TO_TEAM",
+                            ),
+                        ],
+                    ),
                 )
+
+                if message_id:
+                    context.metadata[
+                        "last_processed_message_id"
+                    ] = message_id
+
+                self.session_repository.save(
+                    incoming.sender_id,
+                    context,
+                )
+
+                continue
 
             # One structured record per customer turn: Gemini's raw
             # interpretation, the Python event, and the state before/after.
@@ -143,4 +191,49 @@ class InstagramChannelAdapterV3:
                 processed,
             ignored_messages=
                 ignored,
+            failed_messages=
+                failed,
         )
+
+    def _failure_log(
+        self,
+        *,
+        incoming,
+        context,
+        error: Exception,
+    ) -> dict:
+        """
+        The orchestrator already builds a full turn record before it raises.
+        Use it when present so a crash is as diagnosable as a success.
+        """
+
+        record = dict(
+            getattr(
+                error,
+                "turn_log",
+                None,
+            )
+            or {}
+        )
+
+        record.setdefault(
+            "customer_message",
+            incoming.text
+            or f"[BUTTON:{incoming.button_payload}]",
+        )
+
+        record.setdefault(
+            "before",
+            {
+                "state":
+                    context.state.value,
+                "quote":
+                    context.quote.as_dict(),
+            },
+        )
+
+        record["error"] = repr(
+            error
+        )
+
+        return record

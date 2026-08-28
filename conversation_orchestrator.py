@@ -6,7 +6,11 @@ from dataclasses import dataclass, replace
 from typing import Protocol
 
 from conversation_events import ConversationEvent, EventType
-from conversation_models import ConversationContext, FlowState
+from conversation_models import (
+    QUOTE_STATE_TO_FIELD,
+    ConversationContext,
+    FlowState,
+)
 from conversation_state_machine import (
     ConversationStateMachine,
     TransitionResult,
@@ -538,6 +542,11 @@ class ConversationOrchestrator:
         event: ConversationEvent,
         transition: TransitionResult,
     ) -> ResponsePlan:
+        self._invalidate_dependent_fields(
+            context=context,
+            event=event,
+        )
+
         plan = self._plan_response_base(
             context=context,
             interpretation=interpretation,
@@ -564,6 +573,60 @@ class ConversationOrchestrator:
             )
 
         return plan
+
+    def _invalidate_dependent_fields(
+        self,
+        *,
+        context: ConversationContext,
+        event: ConversationEvent,
+    ) -> str | None:
+        """
+        Changing the service can strand a package that does not exist for the
+        new service.
+
+        expected_field() is derived from the state, not from what is missing,
+        so clearing the package is not enough - the flow has to rewind to it
+        or the quote reaches pricing with a package the catalogue never had.
+        """
+
+        if event.field != "service":
+            return None
+
+        if event.type not in {
+            EventType.FIELD_VALUE,
+            EventType.CHANGE_FIELD,
+        }:
+            return None
+
+        package = context.quote.package
+
+        if not package:
+            return None
+
+        allowed_packages = self._packages_for_current_service(
+            context
+        )
+
+        if self._canonical_allowed_value(
+            package,
+            allowed_packages,
+        ) is not None:
+            return None
+
+        context.quote.set(
+            "package",
+            None,
+        )
+
+        if context.state in QUOTE_STATE_TO_FIELD or context.state in {
+            FlowState.QUOTE_READY,
+            FlowState.EMAIL_CONFIRMATION,
+            FlowState.EMAIL_ADDRESS,
+            FlowState.POST_QUOTE,
+        }:
+            context.state = FlowState.QUOTE_PACKAGE
+
+        return "package"
 
     def _plan_response_base(
         self,
