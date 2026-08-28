@@ -13,6 +13,7 @@ class EventType(str, Enum):
 
     FIELD_VALUE = "FIELD_VALUE"
     CHANGE_FIELD = "CHANGE_FIELD"
+    CHANGE_REQUEST = "CHANGE_REQUEST"
 
     PAUSE = "PAUSE"
     UNCLEAR = "UNCLEAR"

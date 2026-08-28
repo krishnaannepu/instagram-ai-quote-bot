@@ -81,6 +81,34 @@ class CustomerResponseRendererV3:
 
     def render_plan(
         self,
+        plan,
+    ) -> "RenderedMessage":
+        """
+        Render a plan, and always tell the customer what happened to a change
+        they asked for.
+
+        Acknowledging in one branch only is how a change applied at the email
+        step went out as a bare "would you like this emailed?".
+        """
+
+        message = self._render_plan_body(
+            plan
+        )
+
+        confirmation = self._change_confirmation(
+            plan
+        )
+
+        if not confirmation:
+            return message
+
+        return RenderedMessage(
+            text=f"{confirmation} {message.text}",
+            buttons=message.buttons,
+        )
+
+    def _render_plan_body(
+        self,
         plan: ResponsePlan,
     ) -> RenderedMessage:
         action = plan.action
@@ -107,6 +135,48 @@ class CustomerResponseRendererV3:
                 text=self.FIELD_PROMPTS.get(
                     plan.next_field,
                     "Tell us what you need for your quote.",
+                ),
+                buttons=self._buttons_for_plan(
+                    plan
+                ),
+            )
+
+        if action == ResponseAction.ASK_WHAT_TO_CHANGE:
+            change_field = plan.metadata.get(
+                "change_field"
+            )
+
+            if change_field:
+                label = self.FIELD_LABELS.get(
+                    change_field,
+                    str(change_field).replace("_", " "),
+                )
+
+                text = (
+                    f"Sure - what would you like to change "
+                    f"your {label} to?"
+                )
+
+                if plan.options:
+                    text += (
+                        " You can choose "
+                        + ", ".join(plan.options)
+                        + "."
+                    )
+
+                return RenderedMessage(
+                    text=text,
+                    buttons=self._buttons_for_plan(
+                        plan
+                    ),
+                )
+
+            return RenderedMessage(
+                text=(
+                    "Of course. "
+                    + self._status_summary(plan)
+                    + " Tell me which one to change and what to, "
+                    "and I will update your quote."
                 ),
                 buttons=self._buttons_for_plan(
                     plan
@@ -182,13 +252,6 @@ class CustomerResponseRendererV3:
                         plan
                     ),
                 )
-
-            confirmation = self._change_confirmation(
-                plan
-            )
-
-            if confirmation:
-                prompt = f"{confirmation} {prompt}"
 
             return RenderedMessage(
                 text=prompt,
@@ -762,19 +825,74 @@ class CustomerResponseRendererV3:
             "changed_value"
         )
 
+        applied = [
+            entry
+            for entry in (
+                plan.metadata.get(
+                    "changed_fields"
+                )
+                or []
+            )
+            if entry.get("value") not in (None, "")
+        ]
+
+        rejected = plan.metadata.get(
+            "rejected_changes"
+        ) or []
+
+        if len(applied) > 1:
+            parts = [
+                f"{self.FIELD_LABELS.get(entry['field_name'], entry['field_name'])}"
+                f" to {entry['value']}"
+                for entry in applied
+            ]
+
+            sentence = (
+                "Done, I have set "
+                + ", ".join(parts[:-1])
+                + f" and {parts[-1]}."
+            )
+
+            return self._with_rejections(
+                sentence,
+                rejected,
+            )
+
         if value in (None, ""):
             return None
 
         if plan.metadata.get(
             "change_applied"
         ):
-            return (
-                f"Done, your {label} is now {value}."
+            return self._with_rejections(
+                f"Done, your {label} is now {value}.",
+                rejected,
             )
 
-        return (
+        return self._with_rejections(
             f"Your {label} is already {value}, "
-            f"so nothing has changed."
+            f"so nothing has changed.",
+            rejected,
+        )
+
+    def _with_rejections(
+        self,
+        sentence: str,
+        rejected: list,
+    ) -> str:
+        """A detail we could not use must be named, not quietly dropped."""
+
+        if not rejected:
+            return sentence
+
+        names = ", ".join(
+            str(entry.get("value"))
+            for entry in rejected
+        )
+
+        return (
+            f"{sentence} I could not use {names} though - "
+            f"please tell me that one again."
         )
 
     def _buttons_for_plan(

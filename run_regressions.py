@@ -12,6 +12,8 @@ SUITES = [
     "test_change_and_status_v3.py",
     "test_service_correction_v3.py",
     "test_idle_entry_v3.py",
+    "test_change_request_v3.py",
+    "test_contract_coverage_v3.py",
 ]
 
 failed = []

@@ -315,6 +315,20 @@ class ConversationStateMachine:
                 previous_state,
             )
 
+        if event.type == EventType.CHANGE_REQUEST:
+            # Asking to change something is not a change. Nothing moves until
+            # the customer says what, and what to.
+            return self._result(
+                context,
+                previous_state,
+                event,
+                [],
+                note=(
+                    "Customer asked to change something; "
+                    "awaiting the detail."
+                ),
+            )
+
         if event.type == EventType.STATUS_QUESTION:
             # A question about the current quote is read-only. Answering it
             # must never move the conversation or reopen a decision.
@@ -371,7 +385,7 @@ class ConversationStateMachine:
             # the conversation forward, whether the customer phrased it as an
             # answer or as a correction. Otherwise the bot asks again for the
             # thing it was just told.
-            if event.field == expected_before:
+            if expected_before in changed:
                 if context.reviewing_deferred:
                     self._advance_deferred_review(
                         context
@@ -790,16 +804,49 @@ class ConversationStateMachine:
                 "CHANGE_FIELD requires a value."
             )
 
-        old_value = context.quote.get(
-            event.field
-        )
+        # A message can carry several details. Apply them all - dropping the
+        # rest because the slot only held one is how "duration is 4 hrs
+        # coverage is photography" lost half of itself.
+        changes = event.metadata.get(
+            "changes"
+        ) or [
+            {
+                "field_name": event.field,
+                "value": event.value,
+            }
+        ]
 
-        context.quote.set(
-            event.field,
-            event.value,
-        )
+        changed_fields: list[str] = []
 
-        if old_value == event.value:
+        for change in changes:
+            field_name = change["field_name"]
+
+            if field_name not in QUOTE_FIELD_ORDER:
+                continue
+
+            new_value = change["value"]
+
+            if new_value in {
+                None,
+                "",
+            }:
+                continue
+
+            old_value = context.quote.get(
+                field_name
+            )
+
+            context.quote.set(
+                field_name,
+                new_value,
+            )
+
+            if old_value != new_value:
+                changed_fields.append(
+                    field_name
+                )
+
+        if not changed_fields:
             return []
 
         if context.quote_version > 0:
@@ -815,9 +862,7 @@ class ConversationStateMachine:
             }:
                 context.state = FlowState.QUOTE_READY
 
-        return [
-            event.field
-        ]
+        return changed_fields
 
     def _mark_quote_stale(
         self,

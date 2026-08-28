@@ -137,7 +137,7 @@ class ConversationOrchestrator:
                 )
             )
 
-            interpretation = self._auto_start_quote_if_needed(
+            interpretation = self._route_field_intent(
                 context=context,
                 interpretation=interpretation,
             )
@@ -204,23 +204,28 @@ class ConversationOrchestrator:
     # Python catalogue/domain guard
     # ------------------------------------------------------------------
 
-    def _auto_start_quote_if_needed(
+    def _route_field_intent(
         self,
         *,
         context: ConversationContext,
         interpretation: SemanticInterpretation,
     ) -> SemanticInterpretation:
         """
-        A customer who opens with what they want should not have to tap a
-        button first.
+        Decide what a quote value means for the state we are actually in.
 
-        Starting the quote here means the guard, the normalizer and the state
-        machine all see an ordinary quote turn instead of a value arriving in
-        a state that expects no field.
+        The adapter reports which field the customer named. Python decides
+        whether that is an answer to the question being asked, or a detail
+        volunteered out of sequence.
+
+        - at IDLE a quote value starts the quote, so a customer who types
+          what they want does not have to tap a button first;
+        - a value for the field being asked stays FIELD_VALUE and advances;
+        - a value for any other field becomes a change: record it, keep
+          asking for what is still missing.
+
+        Without this, anything said out of order reached the customer as a
+        failed turn.
         """
-
-        if context.state != FlowState.IDLE:
-            return interpretation
 
         if interpretation.action not in {
             SemanticAction.FIELD_VALUE,
@@ -228,15 +233,80 @@ class ConversationOrchestrator:
         }:
             return interpretation
 
-        if interpretation.field_name not in QUOTE_FIELD_ORDER:
+        has_field = interpretation.field_name in QUOTE_FIELD_ORDER
+
+        has_value = interpretation.value not in {
+            None,
+            "",
+        }
+
+        changes = list(
+            interpretation.changes
+        )
+
+        if not changes and has_field and has_value:
+            changes = [
+                {
+                    "field_name":
+                        interpretation.field_name,
+                    "value":
+                        interpretation.value,
+                }
+            ]
+
+        # Several details in one message: apply them all. field_name/value
+        # stay set to the first so every existing single-change path still
+        # works unchanged.
+        if len(changes) > 1:
+            if context.state == FlowState.IDLE:
+                context.reset_for_new_quote()
+
+            return replace(
+                interpretation,
+                action=SemanticAction.CHANGE_FIELD,
+                field_name=changes[0]["field_name"],
+                value=changes[0]["value"],
+                changes=changes,
+            )
+
+        if changes:
+            interpretation = replace(
+                interpretation,
+                field_name=changes[0]["field_name"],
+                value=changes[0]["value"],
+                changes=[],
+            )
+            has_field = True
+            has_value = True
+
+        # "Can I change something?" names no field. "Change the package"
+        # names no value. Both are ordinary messages, not broken output -
+        # ask what they want to change, or what to change it to.
+        if not (has_field and has_value):
+            return replace(
+                interpretation,
+                action=SemanticAction.CHANGE_REQUEST,
+                field_name=(
+                    interpretation.field_name
+                    if has_field
+                    else None
+                ),
+                value=None,
+            )
+
+        if context.state == FlowState.IDLE:
+            context.reset_for_new_quote()
+
+        expected_field = context.expected_field()
+
+        if expected_field is None:
+            # Email, callback and handoff flows own their own input.
             return interpretation
 
-        context.reset_for_new_quote()
-
-        # They may have opened with a later detail ("8 hours for a wedding").
-        # Only the field the flow is actually asking for can take the
-        # expected-value path; anything else is applied as a change.
-        if interpretation.field_name != context.expected_field():
+        if (
+            interpretation.action == SemanticAction.FIELD_VALUE
+            and interpretation.field_name != expected_field
+        ):
             return replace(
                 interpretation,
                 action=SemanticAction.CHANGE_FIELD,
@@ -286,6 +356,77 @@ class ConversationOrchestrator:
                         interpretation,
                         value=canonical,
                     )
+
+        if (
+            interpretation.action == SemanticAction.CHANGE_FIELD
+            and interpretation.changes
+        ):
+            accepted = []
+            rejected = []
+
+            for change in interpretation.changes:
+                field_name = change["field_name"]
+
+                allowed_values = self._allowed_values_for_field(
+                    context,
+                    field_name,
+                )
+
+                if not allowed_values:
+                    accepted.append(change)
+                    continue
+
+                canonical = self._canonical_allowed_value(
+                    change["value"],
+                    allowed_values,
+                )
+
+                if canonical is None:
+                    rejected.append(change)
+                    continue
+
+                accepted.append(
+                    {
+                        "field_name": field_name,
+                        "value": canonical,
+                    }
+                )
+
+            # Nothing usable left: reject as a single bad value.
+            if not accepted:
+                first = interpretation.changes[0]
+
+                return (
+                    interpretation,
+                    ConversationEvent(
+                        type=EventType.INVALID_FIELD_VALUE,
+                        field=first["field_name"],
+                        value=first["value"],
+                        metadata={
+                            "source": "python_catalogue_guard",
+                            "allowed_values": list(
+                                self._allowed_values_for_field(
+                                    context,
+                                    first["field_name"],
+                                )
+                            ),
+                        },
+                    ),
+                )
+
+            return (
+                replace(
+                    interpretation,
+                    field_name=accepted[0]["field_name"],
+                    value=accepted[0]["value"],
+                    changes=accepted,
+                    metadata={
+                        **interpretation.metadata,
+                        "rejected_changes": rejected,
+                    },
+                ),
+                None,
+            )
 
         if interpretation.action == SemanticAction.CHANGE_FIELD:
             allowed_values = self._allowed_values_for_field(
@@ -623,6 +764,26 @@ class ConversationOrchestrator:
                     "change_applied": bool(
                         transition.changed_fields
                     ),
+                    "changed_fields": [
+                        {
+                            "field_name": field_name,
+                            "value": context.quote.get(
+                                field_name
+                            ),
+                        }
+                        for field_name in (
+                            change.get("field_name")
+                            for change in
+                            event.metadata.get("changes")
+                            or []
+                        )
+                        if field_name
+                    ],
+                    "rejected_changes":
+                        event.metadata.get(
+                            "rejected_changes"
+                        )
+                        or [],
                 },
             )
 
@@ -776,6 +937,25 @@ class ConversationOrchestrator:
                             event.field
                             or context.expected_field(),
                         ),
+                },
+            )
+
+        if event.type == EventType.CHANGE_REQUEST:
+            return ResponsePlan(
+                action=ResponseAction.ASK_WHAT_TO_CHANGE,
+                state=context.state,
+                next_field=context.expected_field(),
+                options=self._allowed_values_for_field(
+                    context,
+                    event.field,
+                ),
+                current_package=context.quote.package,
+                language=language,
+                metadata={
+                    "quote_summary":
+                        context.quote.as_dict(),
+                    "change_field":
+                        event.field,
                 },
             )
 

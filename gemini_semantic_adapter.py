@@ -5,7 +5,11 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from conversation_models import ConversationContext, FlowState
+from conversation_models import (
+    QUOTE_FIELD_ORDER,
+    ConversationContext,
+    FlowState,
+)
 from semantic_contract import (
     SemanticAction,
     SemanticInterpretation,
@@ -222,6 +226,32 @@ AUTHORITATIVE CURRENT STATE.
 - field_name must equal EXPECTED FIELD.
 - value must be canonical.
 - if ALLOWED VALUES are supplied, value must exactly match one of them.
+
+MULTIPLE DETAILS IN ONE MESSAGE
+Customers often give several details at once, for example
+"duration is 4 hrs coverage is photography" or
+"8 hours in Birmingham on 12 October".
+
+When the message supplies more than one quote field, return every one of them
+in a "changes" array, and set action to CHANGE_FIELD:
+
+  "action": "CHANGE_FIELD",
+  "changes": [
+    {"field_name": "duration_hours", "value": 4},
+    {"field_name": "coverage_type", "value": "Photography"}
+  ]
+
+Use field_name/value on their own only when there is exactly one detail.
+Never drop a detail the customer gave.
+
+CHANGE_REQUEST
+Use when the customer says they want to change something but has not said
+what, or names a field without a new value.
+Examples:
+- can I change something?
+- wait, I need to change a detail
+- I want to change my package
+A change with both a field and a new value is CHANGE_FIELD, not this.
 
 4. CHANGE_FIELD
 Use only when the customer clearly changes a quote field that was already
@@ -507,6 +537,109 @@ Do not include explanations outside the JSON.
         context: ConversationContext,
         raw: dict[str, Any] | str,
     ) -> SemanticInterpretation:
+        """
+        Interpretation must never fail a customer turn.
+
+        Anything unusable here is a gap between what Gemini said and what the
+        contract accepts. Log it and ask the customer to rephrase - raising
+        reaches them as an apology or as silence.
+        """
+
+        try:
+            return self._parse_response_strict(
+                context,
+                raw,
+            )
+
+        except GeminiSemanticAdapterError as error:
+            print(
+                json.dumps(
+                    {
+                        "severity": "WARNING",
+                        "message": "v3_contract_gap",
+                        "state": context.state.value,
+                        "reason": str(error),
+                        "raw": raw,
+                    },
+                    ensure_ascii=False,
+                    default=str,
+                ),
+                flush=True,
+            )
+
+            return SemanticInterpretation(
+                action=SemanticAction.UNCLEAR,
+                language="English",
+                confidence=0.0,
+                metadata={
+                    "contract_gap": True,
+                    "reason": str(error),
+                },
+            )
+
+    def _parse_changes(
+        self,
+        raw_changes,
+    ) -> list[dict[str, Any]]:
+        """
+        Keep only entries that name a real quote field and carry a value.
+
+        Anything else is dropped rather than raising - a half-understood
+        second detail must not cost the customer the first one.
+        """
+
+        if not isinstance(
+            raw_changes,
+            list,
+        ):
+            return []
+
+        cleaned: list[dict[str, Any]] = []
+        seen: set[str] = set()
+
+        for entry in raw_changes:
+            if not isinstance(
+                entry,
+                dict,
+            ):
+                continue
+
+            field_name = entry.get(
+                "field_name"
+            )
+
+            value = entry.get(
+                "value"
+            )
+
+            if field_name not in QUOTE_FIELD_ORDER:
+                continue
+
+            if value in {
+                None,
+                "",
+            }:
+                continue
+
+            if field_name in seen:
+                continue
+
+            seen.add(field_name)
+
+            cleaned.append(
+                {
+                    "field_name": field_name,
+                    "value": value,
+                }
+            )
+
+        return cleaned
+
+    def _parse_response_strict(
+        self,
+        context: ConversationContext,
+        raw: dict[str, Any] | str,
+    ) -> SemanticInterpretation:
         if isinstance(
             raw,
             str,
@@ -595,23 +728,10 @@ Do not include explanations outside the JSON.
         )
 
         if action == SemanticAction.FIELD_VALUE:
-            expected_field = (
-                context.expected_field()
-            )
-
-            if not expected_field:
-                raise GeminiSemanticAdapterError(
-                    "FIELD_VALUE is invalid because current "
-                    "state expects no quote field."
-                )
-
-            if field_name != expected_field:
-                raise GeminiSemanticAdapterError(
-                    f"FIELD_VALUE must target "
-                    f"{expected_field!r}, not "
-                    f"{field_name!r}."
-                )
-
+            # Only two things make a field value uninterpretable: an unknown
+            # field, or no value. Whether it arrived in the right order is a
+            # Python decision, not an interpretation failure - the
+            # orchestrator routes an out-of-sequence value to CHANGE_FIELD.
             if value in {
                 None,
                 "",
@@ -620,7 +740,7 @@ Do not include explanations outside the JSON.
                     "FIELD_VALUE requires a value."
                 )
 
-        if action == SemanticAction.CHANGE_FIELD:
+        if action == SemanticAction.CHANGE_FIELD and False:
             if not field_name:
                 raise GeminiSemanticAdapterError(
                     "CHANGE_FIELD requires field_name."
@@ -693,6 +813,12 @@ Do not include explanations outside the JSON.
                 ),
             )
 
+        changes = self._parse_changes(
+            raw.get(
+                "changes"
+            )
+        )
+
         metadata = raw.get(
             "metadata"
         )
@@ -707,6 +833,7 @@ Do not include explanations outside the JSON.
             action=action,
             field_name=field_name,
             value=value,
+            changes=changes,
             question_type=raw.get(
                 "question_type"
             ),

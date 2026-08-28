@@ -209,6 +209,15 @@ class EventNormalizer:
 
             return event
 
+        if action == SemanticAction.CHANGE_REQUEST:
+            return ConversationEvent(
+                type=EventType.CHANGE_REQUEST,
+                field=interpretation.field_name,
+                metadata=self._semantic_metadata(
+                    interpretation
+                ),
+            )
+
         if action == SemanticAction.CHANGE_FIELD:
             if not interpretation.field_name:
                 raise EventNormalizationError(
@@ -224,9 +233,19 @@ class EventNormalizer:
                 type=EventType.CHANGE_FIELD,
                 field=interpretation.field_name,
                 value=interpretation.value,
-                metadata=self._semantic_metadata(
-                    interpretation
-                ),
+                metadata={
+                    **self._semantic_metadata(
+                        interpretation
+                    ),
+                    "changes": list(
+                        interpretation.changes
+                    ),
+                    "rejected_changes":
+                        interpretation.metadata.get(
+                            "rejected_changes"
+                        )
+                        or [],
+                },
             )
 
         if action == SemanticAction.BUSINESS_QUESTION:
