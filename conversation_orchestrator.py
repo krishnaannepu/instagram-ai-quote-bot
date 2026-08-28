@@ -18,7 +18,11 @@ from conversation_state_machine import (
 )
 from event_normalizer import EventNormalizer
 from response_plan import ResponseAction, ResponsePlan
-from semantic_contract import SemanticAction, SemanticInterpretation
+from semantic_contract import (
+    QUOTE_EDITABLE_STATES,
+    SemanticAction,
+    SemanticInterpretation,
+)
 from turn_logger import build_turn_log
 
 
@@ -93,6 +97,17 @@ class ConversationOrchestrator:
         context: ConversationContext,
         message_text: str,
     ) -> OrchestratorResult:
+        # Asking to stop must always work - in any state, and even if the
+        # model is unavailable or the state parses its own input. This runs
+        # before everything else for that reason.
+        deterministic_finish = self._try_finish_input(
+            context=context,
+            message_text=message_text,
+        )
+
+        if deterministic_finish is not None:
+            return deterministic_finish
+
         # Phone number itself is deterministic data, not an LLM decision.
         if context.state == FlowState.CALLBACK_PHONE:
             deterministic_phone = self._try_callback_phone_input(
@@ -300,7 +315,16 @@ class ConversationOrchestrator:
         expected_field = context.expected_field()
 
         if expected_field is None:
-            # Email, callback and handoff flows own their own input.
+            # No field is being asked for. In a state where the quote can
+            # still be edited - after pricing, at the email step, post-quote -
+            # any value the customer gives is a change to that field.
+            # Callback and handoff flows own their own input, so leave those.
+            if context.state in QUOTE_EDITABLE_STATES:
+                return replace(
+                    interpretation,
+                    action=SemanticAction.CHANGE_FIELD,
+                )
+
             return interpretation
 
         if (
@@ -606,6 +630,126 @@ class ConversationOrchestrator:
     # Deterministic callback phone
     # ------------------------------------------------------------------
 
+    # Whole-message matches only. "stop by the studio" is a location, and
+    # "don't finish yet" is not a request to end - neither may trigger this.
+    FINISH_PHRASES = frozenset({
+        "stop",
+        "stop it",
+        "stop please",
+        "please stop",
+        "finish",
+        "finished",
+        "im finished",
+        "i am finished",
+        "im done",
+        "i am done",
+        "done",
+        "thats all",
+        "that is all",
+        "thats it",
+        "that is it",
+        "nothing else",
+        "no thanks bye",
+        "cancel",
+        "cancel it",
+        "cancel please",
+        "end",
+        "end chat",
+        "end it",
+        "exit",
+        "quit",
+        "close",
+        "close chat",
+        "bye",
+        "byee",
+        "goodbye",
+        "good bye",
+        "bye bye",
+        "bye thanks",
+        "thanks bye",
+        "ok bye",
+        "okay bye",
+        "alright bye",
+        "bas",
+        "bas karo",
+        "khatam",
+        "band karo",
+        "chalo bye",
+        "aapko dhanyavaad",
+        "aagipo",
+        "chaalu",
+    })
+
+    def _try_finish_input(
+        self,
+        *,
+        context: ConversationContext,
+        message_text: str,
+    ) -> OrchestratorResult | None:
+        text = str(
+            message_text
+            or ""
+        ).strip().casefold()
+
+        # Drop apostrophes rather than splitting on them, so "that's all"
+        # normalises to "thats all" and not "that s all".
+        text = re.sub(
+            r"['\u2019\u02bc]",
+            "",
+            text,
+        )
+
+        normalized = " ".join(
+            re.sub(
+                r"[^a-z0-9\s]",
+                " ",
+                text,
+            ).split()
+        )
+
+        if normalized not in self.FINISH_PHRASES:
+            return None
+
+        before = deepcopy(
+            context
+        )
+
+        event = ConversationEvent(
+            type=EventType.FINISH,
+            metadata={
+                "source": "deterministic_finish_parser",
+            },
+        )
+
+        transition = self.state_machine.handle(
+            context,
+            event,
+        )
+
+        response_plan = self._plan_response(
+            context=context,
+            interpretation=None,
+            event=event,
+            transition=transition,
+        )
+
+        turn_log = build_turn_log(
+            context_before=before,
+            context_after=context,
+            customer_message=message_text,
+            interpretation=None,
+            event=event,
+            response_plan=response_plan,
+        )
+
+        return OrchestratorResult(
+            context=context,
+            interpretation=None,
+            event=event,
+            response_plan=response_plan,
+            turn_log=turn_log,
+        )
+
     def _try_callback_phone_input(
         self,
         *,
@@ -887,6 +1031,15 @@ class ConversationOrchestrator:
         )
 
         if event.type == EventType.GREETING:
+            # Welcome only when there is nothing under way. Mid-quote, a
+            # greeting must not look like the conversation restarted - pick
+            # up the question the customer still owes us an answer to.
+            if context.state != FlowState.IDLE:
+                return self._resume_plan(
+                    context=context,
+                    language=language,
+                )
+
             return ResponsePlan(
                 action=ResponseAction.WELCOME,
                 state=context.state,

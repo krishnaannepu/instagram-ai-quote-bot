@@ -267,6 +267,21 @@ Examples:
 - any discounts?
 - how do payments work?
 
+FINISH
+Use when the customer wants to end the conversation, at any point and whether
+or not the quote is complete.
+Examples:
+- stop / stop it / that's enough
+- finish / I'm done / nothing else thanks
+- cancel this / forget it / never mind
+- bye / goodbye / thanks bye
+- not interested any more
+- equivalent multilingual phrases such as "bas", "khatam", "band karo"
+Ending is always allowed. Never refuse it because a quote is unfinished, and
+never treat it as a business question.
+Do NOT use FINISH for "don't stop", "wait", "hold on" or "one moment" - those
+are PAUSE.
+
 STATUS_QUESTION
 Use when the customer asks what is currently recorded on their own quote,
 rather than asking about the business or about package differences.

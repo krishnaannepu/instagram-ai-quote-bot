@@ -14,6 +14,8 @@ SUITES = [
     "test_idle_entry_v3.py",
     "test_change_request_v3.py",
     "test_contract_coverage_v3.py",
+    "test_full_turn_matrix_v3.py",
+    "test_finish_anywhere_v3.py",
 ]
 
 failed = []

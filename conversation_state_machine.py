@@ -40,17 +40,31 @@ class ConversationStateMachine:
         previous_state = context.state
 
         if event.type == EventType.GREETING:
-            if context.state != FlowState.IDLE:
-                raise InvalidTransitionError(
-                    "GREETING is only valid from IDLE."
+            # Someone saying hello after the conversation ended is starting
+            # a new one. Clear the old quote and welcome them properly.
+            if context.state == FlowState.FINISHED:
+                context.reset_for_new_quote()
+                context.state = FlowState.IDLE
+
+                return self._result(
+                    context,
+                    previous_state,
+                    event,
+                    [],
+                    note=(
+                        "Greeting after finishing; "
+                        "started a fresh conversation."
+                    ),
                 )
 
+            # Mid-conversation, a greeting changes nothing. The customer is
+            # checking we are still here, not restarting.
             return self._result(
                 context,
                 previous_state,
                 event,
                 [],
-                note="Greeting received; remaining in IDLE.",
+                note="Greeting received; state unchanged.",
             )
 
         if event.type in {
@@ -353,6 +367,21 @@ class ConversationStateMachine:
             )
 
         if event.type == EventType.UNCLEAR:
+            # UNCLEAR is where every contract gap lands, so it has to be safe
+            # in every state. Deferring only makes sense when a field is
+            # actually being asked for; anywhere else, ask again and move on.
+            if context.expected_field() is None:
+                return self._result(
+                    context,
+                    previous_state,
+                    event,
+                    [],
+                    note=(
+                        "Could not interpret the message; "
+                        "state unchanged."
+                    ),
+                )
+
             return self._defer_current_field(
                 context,
                 event,
