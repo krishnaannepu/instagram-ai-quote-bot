@@ -9,6 +9,7 @@ from conversation_models import FlowState
 
 class ResponseAction(str, Enum):
     WELCOME = "WELCOME"
+    WELCOME_BACK = "WELCOME_BACK"
 
     ASK_FIELD = "ASK_FIELD"
     RESUME_FIELD = "RESUME_FIELD"

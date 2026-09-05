@@ -1186,6 +1186,16 @@ class ConversationOrchestrator:
             )
 
         if event.type == EventType.BUSINESS_QUESTION_RESOLVED:
+            if context.state == FlowState.IDLE:
+                # A business question asked before any quote was started
+                # resolves back to IDLE. Do not repeat the first-contact
+                # greeting - the customer already engaged.
+                return ResponsePlan(
+                    action=ResponseAction.WELCOME_BACK,
+                    state=context.state,
+                    language=language,
+                )
+
             return self._resume_plan(
                 context=context,
                 language=language,

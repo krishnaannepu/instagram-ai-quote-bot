@@ -130,6 +130,24 @@ class CustomerResponseRendererV3:
                 ],
             )
 
+        if action == ResponseAction.WELCOME_BACK:
+            return RenderedMessage(
+                text=(
+                    "Is there anything else I can help with? Let me "
+                    "know if you'd like a quote."
+                ),
+                buttons=[
+                    ButtonSpec(
+                        label="Get a Quote",
+                        payload="GET_QUOTE",
+                    ),
+                    ButtonSpec(
+                        label="Speak to Team",
+                        payload="SPEAK_TO_TEAM",
+                    ),
+                ],
+            )
+
         if action == ResponseAction.STARTED_NEW_QUOTE:
             return RenderedMessage(
                 text=self.FIELD_PROMPTS.get(
