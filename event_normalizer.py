@@ -273,6 +273,14 @@ class EventNormalizer:
                 ),
             )
 
+        if action == SemanticAction.LANGUAGE_REQUEST:
+            return ConversationEvent(
+                type=EventType.LANGUAGE_REQUEST,
+                metadata=self._semantic_metadata(
+                    interpretation
+                ),
+            )
+
         if action == SemanticAction.PACKAGE_RECONSIDERATION:
             if not context.quote.package:
                 raise EventNormalizationError(

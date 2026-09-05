@@ -8,6 +8,7 @@ from business_question_coordinator_v3 import (
 from conversation_models import ConversationContext
 from conversation_orchestrator import ConversationOrchestrator
 from customer_response_renderer_v3 import (
+    ButtonSpec,
     CustomerResponseRendererV3,
     RenderedMessage,
 )
@@ -17,6 +18,9 @@ from email_delivery_adapter_v3 import (
 )
 from handoff_callback_service_v3 import (
     HandoffCallbackServiceV3,
+)
+from message_translator_v3 import (
+    MessageTranslatorV3,
 )
 from quote_completion_service_v3 import (
     QuoteCompletionServiceV3,
@@ -56,6 +60,8 @@ class LocalConversationRuntimeV3:
             HandoffCallbackServiceV3 | None = None,
         renderer:
             CustomerResponseRendererV3 | None = None,
+        translator:
+            MessageTranslatorV3 | None = None,
     ):
         self.orchestrator = (
             orchestrator
@@ -75,6 +81,10 @@ class LocalConversationRuntimeV3:
         self.renderer = (
             renderer
             or CustomerResponseRendererV3()
+        )
+        self.translator = (
+            translator
+            or MessageTranslatorV3()
         )
 
     def handle_text(
@@ -116,6 +126,98 @@ class LocalConversationRuntimeV3:
         )
 
     def _complete(
+        self,
+        *,
+        context: ConversationContext,
+        result,
+    ) -> RuntimeTurnResult:
+        """
+        Build the turn as usual, then translate at the very edge if the
+        customer has asked for a different language. Python still only
+        ever plans and renders one canonical English turn above this -
+        nothing about routing, state, or field logic changes.
+        """
+
+        turn_result = self._complete_untranslated(
+            context=context,
+            result=result,
+        )
+
+        preferred_language = str(
+            context.metadata.get(
+                "preferred_language"
+            )
+            or ""
+        ).strip()
+
+        if not preferred_language:
+            return turn_result
+
+        return RuntimeTurnResult(
+            messages=self._translate_messages(
+                messages=turn_result.messages,
+                target_language=preferred_language,
+            ),
+            quote=turn_result.quote,
+            turn_log=turn_result.turn_log,
+        )
+
+    def _translate_messages(
+        self,
+        *,
+        messages: list[RenderedMessage],
+        target_language: str,
+    ) -> list[RenderedMessage]:
+        fragments: list[str] = []
+        owner: list[tuple[int, int]] = []
+        # owner[i] = (message_index, button_index), button_index -1 = body text
+
+        for m_index, message in enumerate(messages):
+            fragments.append(message.text)
+            owner.append((m_index, -1))
+
+            for b_index, button in enumerate(message.buttons):
+                fragments.append(button.label)
+                owner.append((m_index, b_index))
+
+        translated = self.translator.translate_batch(
+            texts=fragments,
+            target_language=target_language,
+        )
+
+        new_text_by_message: dict[int, str] = {}
+        new_label_by_button: dict[tuple[int, int], str] = {}
+
+        for fragment_index, (m_index, b_index) in enumerate(owner):
+            value = translated[fragment_index]
+
+            if b_index == -1:
+                new_text_by_message[m_index] = value
+            else:
+                new_label_by_button[(m_index, b_index)] = value
+
+        return [
+            RenderedMessage(
+                text=new_text_by_message.get(
+                    m_index, message.text
+                ),
+                buttons=[
+                    ButtonSpec(
+                        label=new_label_by_button.get(
+                            (m_index, b_index), button.label
+                        ),
+                        payload=button.payload,
+                    )
+                    for b_index, button in enumerate(
+                        message.buttons
+                    )
+                ],
+                metadata=message.metadata,
+            )
+            for m_index, message in enumerate(messages)
+        ]
+
+    def _complete_untranslated(
         self,
         *,
         context: ConversationContext,

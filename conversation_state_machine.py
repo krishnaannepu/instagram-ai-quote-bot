@@ -357,6 +357,35 @@ class ConversationStateMachine:
                 ),
             )
 
+        if event.type == EventType.LANGUAGE_REQUEST:
+            # A request to reply in a different language is read-only - it
+            # must never move the conversation or reopen a decision. Record
+            # the preference so every later reply in this conversation uses
+            # it, until the customer asks to switch back to English.
+            requested_language = str(
+                event.metadata.get("language") or ""
+            ).strip()
+
+            if (
+                requested_language
+                and requested_language.lower() != "english"
+            ):
+                context.metadata["preferred_language"] = (
+                    requested_language
+                )
+            else:
+                context.metadata.pop(
+                    "preferred_language", None
+                )
+
+            return self._result(
+                context,
+                previous_state,
+                event,
+                [],
+                note="Recorded language preference; state unchanged.",
+            )
+
         if event.type == EventType.PAUSE:
             return self._result(
                 context,

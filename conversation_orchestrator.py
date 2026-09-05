@@ -1156,6 +1156,15 @@ class ConversationOrchestrator:
                 },
             )
 
+        if event.type == EventType.LANGUAGE_REQUEST:
+            # Re-show whatever the customer was already being asked. Python
+            # still only ever builds one canonical English plan here - the
+            # translation itself happens once at the edge, in the runtime.
+            return self._resume_plan(
+                context=context,
+                language=language,
+            )
+
         if event.type == EventType.BUSINESS_QUESTION:
             return ResponsePlan(
                 action=ResponseAction.ANSWER_BUSINESS_QUESTION,

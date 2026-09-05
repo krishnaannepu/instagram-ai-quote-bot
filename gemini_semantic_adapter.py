@@ -294,6 +294,24 @@ Examples:
 A status question is read-only. It is never PACKAGE_RECONSIDERATION, because
 the customer is asking what is already selected, not asking to reconsider it.
 
+LANGUAGE_REQUEST
+Use when the customer explicitly asks for replies in a different language,
+rather than asking a question about the business itself.
+Examples:
+- can you explain in Hindi
+- reply in Hindi please
+- Hinglish mein bolo
+- can you speak Telugu
+- switch to English
+- English please
+This is about HOW to reply, not a question needing an answer from the
+business's own information. Do not treat it as BUSINESS_QUESTION - there is
+nothing to look up in pricing, packages, or FAQs for a language switch.
+Set "language" to the language the customer asked for, using its common
+English name (for example "Hindi", "Telugu", "English") - not the
+language the request itself happened to be typed in. A plain switch back
+to English is also LANGUAGE_REQUEST, with language set to "English".
+
 6. PACKAGE_RECONSIDERATION
 Use when:
 - a package is already selected, AND
@@ -401,6 +419,10 @@ Return one JSON object using exactly these keys:
 "changes" carries every quote field the message supplies when there is more
 than one. Leave it as [] when the message supplies one detail or none.
 Each entry is {{"field_name": "<quote field>", "value": <value>}}.
+
+"language" is the language the CUSTOMER'S MESSAGE was written in, except
+for LANGUAGE_REQUEST, where it is the language the customer asked to
+switch to.
 
 Do not return Markdown.
 Do not include explanations outside the JSON.

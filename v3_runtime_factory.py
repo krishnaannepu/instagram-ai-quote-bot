@@ -16,6 +16,7 @@ from instagram_sender_v3 import ExistingInstagramServiceSenderV3
 from meta_webhook_parser_v3 import MetaWebhookParserV3
 from lead_persistence_adapter_v3 import LeadPersistenceAdapterV3
 from local_conversation_runtime_v3 import LocalConversationRuntimeV3
+from message_translator_v3 import MessageTranslatorV3
 from quote_adapter_v3 import QuoteAdapterV3
 from quote_completion_service_v3 import QuoteCompletionServiceV3
 from session_repository_v3 import InMemorySessionRepositoryV3
@@ -87,6 +88,7 @@ def build_instagram_channel_v3(
         email_delivery=email_delivery,
         handoff_service=handoff_service,
         renderer=CustomerResponseRendererV3(),
+        translator=MessageTranslatorV3(),
     )
 
     sender = ExistingInstagramServiceSenderV3(
