@@ -201,3 +201,6 @@ Cloud Run service account in production.
 2. **The webhook is unauthenticated.** No `X-Hub-Signature-256` check, so anyone
    with the URL can post events. Verify the signature before real traffic.
 3. **Prices are floats.** `Decimal` would be correct for money.
+4. **Every file sits flat in the root.** No `src/`, `tests/` or
+   `adapters/` folders yet. Kept flat to ship and test quickly;
+   splitting it into packages is the next cleanup, not a rewrite.
