@@ -32,10 +32,10 @@ For a file-by-file walkthrough of what each module does and how they
 connect, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
 
 For an interactive, click-through version of the architecture, open
-**[how-it-works.html](how-it-works.html)** in a browser.
+**[how-it-works.html](https://krishnaannepu.github.io/instagram-ai-quote-bot/how-it-works.html)** in a browser.
 
 For a visual map that shows exactly which files sit behind each part of
-the system - click any block to see them - open **[code-map.html](code-map.html)**.
+the system - click any block to see them - open **[code-map.html](https://krishnaannepu.github.io/instagram-ai-quote-bot/code-map.html)**.
 
 Everything in the root is reachable from `main.py` or is part of the test gate.
 Anything unreachable lives in `archive/`.
