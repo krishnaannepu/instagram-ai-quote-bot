@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How a DM Becomes a Quote</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 14px system-ui, -apple-system, "Segoe UI", sans-serif; background: #fafaf9; }
+  img { max-width: 100%; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    --ground:       #F1F5F3;
+    --surface:      #FFFFFF;
+    --sunk:         #E7EDEA;
+    --ink:          #121A17;
+    --ink-muted:    #53625D;
+    --ink-faint:    #83928C;
+    --line:         #D6DFDB;
+    --line-firm:    #B7C4BE;
+
+    --lang:         #A85A16;
+    --lang-bg:      #F8EBDC;
+    --logic:        #0F6468;
+    --logic-bg:     #DDECEC;
+    --data:         #2C6A43;
+    --data-bg:      #E0EFE5;
+    --stop:         #A33726;
+    --stop-bg:      #F8E4DF;
+
+    --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --font-body:    "Newsreader", Georgia, "Times New Roman", serif;
+    --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:    #0C1411;
+      --surface:   #13201B;
+      --sunk:      #0F1A16;
+      --ink:       #E3EBE7;
+      --ink-muted: #9AAAA4;
+      --ink-faint: #71817B;
+      --line:      #223029;
+      --line-firm: #33443C;
+
+      --lang:      #E59D58;
+      --lang-bg:   #35251A;
+      --logic:     #56C1C4;
+      --logic-bg:  #0F2C2D;
+      --data:      #73C28D;
+      --data-bg:   #132C1E;
+      --stop:      #E28A76;
+      --stop-bg:   #33201B;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:    #0C1411;
+    --surface:   #13201B;
+    --sunk:      #0F1A16;
+    --ink:       #E3EBE7;
+    --ink-muted: #9AAAA4;
+    --ink-faint: #71817B;
+    --line:      #223029;
+    --line-firm: #33443C;
+
+    --lang:      #E59D58;
+    --lang-bg:   #35251A;
+    --logic:     #56C1C4;
+    --logic-bg:  #0F2C2D;
+    --data:      #73C28D;
+    --data-bg:   #132C1E;
+    --stop:      #E28A76;
+    --stop-bg:   #33201B;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 52px 22px 88px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  /* ---------------- header ---------------- */
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(34px, 5.4vw, 58px);
+    line-height: 1.03;
+    letter-spacing: -0.025em;
+    margin: 0 0 18px;
+    text-wrap: balance;
+  }
+
+  .lede {
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink-muted);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  .lede strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------------- the rule ---------------- */
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 20px;
+  }
+
+  .rule {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  @media (min-width: 760px) {
+    .rule { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--tone);
+    padding: 18px 20px 20px;
+  }
+
+  .rule-card.lang  { --tone: var(--lang); }
+  .rule-card.logic { --tone: var(--logic); }
+  .rule-card.data  { --tone: var(--data); }
+
+  .rule-who {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.01em;
+    color: var(--tone);
+    margin: 0 0 6px;
+  }
+
+  .rule-does {
+    font-size: 15.5px;
+    line-height: 1.5;
+    color: var(--ink-muted);
+    margin: 0;
+  }
+
+  .rule-does strong { color: var(--ink); font-weight: 500; }
+
+  /* ---------------- controls ---------------- */
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 28px;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+
+  .scenarios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  button {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--ink-muted);
+    background: var(--surface);
+    border: 1px solid var(--line-firm);
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+
+  button:hover { color: var(--ink); border-color: var(--ink-faint); }
+
+  button:focus-visible {
+    outline: 2px solid var(--logic);
+    outline-offset: 2px;
+  }
+
+  .scenarios button[aria-pressed="true"] {
+    color: var(--ground);
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .transport { display: flex; gap: 8px; align-items: center; }
+
+  .transport .play {
+    min-width: 92px;
+    font-weight: 600;
+    color: var(--logic);
+    border-color: var(--logic);
+  }
+
+  .step-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    padding-left: 6px;
+  }
+
+  /* ---------------- diagram ---------------- */
+
+  .stage-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 8px 8px 4px;
+    overflow-x: auto;
+  }
+
+  svg.flow { display: block; width: 100%; min-width: 700px; height: auto; }
+
+  .node rect {
+    fill: var(--sunk);
+    stroke: var(--line-firm);
+    stroke-width: 1.5;
+    transition: fill .3s, stroke .3s;
+  }
+
+  .node .n-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    fill: var(--ink);
+    transition: fill .3s;
+  }
+
+  .node .n-file {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    fill: var(--ink-faint);
+    transition: fill .3s;
+  }
+
+  .node.on rect        { fill: var(--tone-bg); stroke: var(--tone); stroke-width: 2.5; }
+  .node.on .n-title    { fill: var(--tone); }
+  .node.on .n-file     { fill: var(--tone); }
+
+  .node[data-tone="lang"]  { --tone: var(--lang);  --tone-bg: var(--lang-bg); }
+  .node[data-tone="logic"] { --tone: var(--logic); --tone-bg: var(--logic-bg); }
+  .node[data-tone="data"]  { --tone: var(--data);  --tone-bg: var(--data-bg); }
+  .node[data-tone="stop"]  { --tone: var(--stop);  --tone-bg: var(--stop-bg); }
+  .node[data-tone="plain"] { --tone: var(--ink);   --tone-bg: var(--sunk); }
+
+  .wire { stroke: var(--line-firm); stroke-width: 1.5; fill: none; }
+  .wire-dash { stroke: var(--data); stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; opacity: .45; transition: opacity .3s; }
+  .wire-dash.lit { opacity: 1; }
+
+  .wire-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    fill: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  #packet circle { fill: var(--logic); }
+  #packet.lang circle { fill: var(--lang); }
+  #packet.stop circle { fill: var(--stop); }
+  #packet { transition: transform .55s cubic-bezier(.45,.05,.3,1); }
+  #packet .halo { opacity: .22; }
+
+  /* ---------------- caption ---------------- */
+
+  .caption {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-top: none;
+    background: var(--surface);
+  }
+
+  @media (min-width: 820px) {
+    .caption { grid-template-columns: 1.55fr 1fr; }
+  }
+
+  .cap-main { padding: 22px 24px 24px; min-height: 172px; }
+
+  .cap-step {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 8px;
+  }
+
+  .cap-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 25px;
+    letter-spacing: -0.018em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .cap-say { font-size: 17px; line-height: 1.55; color: var(--ink-muted); margin: 0; max-width: 54ch; }
+  .cap-say strong { color: var(--ink); font-weight: 500; }
+
+  .cap-side {
+    padding: 22px 24px 24px;
+    background: var(--sunk);
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @media (min-width: 820px) {
+    .cap-side { border-top: none; border-left: 1px solid var(--line); }
+  }
+
+  .side-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 6px;
+  }
+
+  .side-val {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .side-val.tone-lang  { color: var(--lang); }
+  .side-val.tone-logic { color: var(--logic); }
+  .side-val.tone-data  { color: var(--data); }
+  .side-val.tone-stop  { color: var(--stop); }
+
+  /* ---------------- folder map ---------------- */
+
+  .folder {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+
+  @media (min-width: 700px) {
+    .folder { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .fold {
+    background: var(--surface);
+    padding: 18px 20px 20px;
+  }
+
+  .fold h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .fold p { font-size: 15px; line-height: 1.5; color: var(--ink-muted); margin: 0 0 10px; }
+
+  .fold code {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    display: block;
+    line-height: 1.7;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #packet, .node rect, .node .n-title, .node .n-file, .wire-dash { transition: none; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">instagram-ai-quote-bot &middot; how it works</p>
+    <h1>How a DM becomes a quote</h1>
+    <p class="lede">
+      Someone messages a photography business on Instagram. Seconds later they have a
+      price. This is every step in between &mdash; and <strong>the one rule that keeps
+      the AI from inventing your prices.</strong>
+    </p>
+  </header>
+
+  <section>
+    <h2>The rule everything else follows</h2>
+    <div class="rule">
+      <div class="rule-card lang">
+        <p class="rule-who">Gemini understands</p>
+        <p class="rule-does">Reads the message and reports <strong>what it means</strong>. That is all it is allowed to do.</p>
+      </div>
+      <div class="rule-card logic">
+        <p class="rule-who">Python decides</p>
+        <p class="rule-does">Checks that meaning against the approved list, then <strong>decides what changes</strong>. Nothing else may touch the conversation.</p>
+      </div>
+      <div class="rule-card data">
+        <p class="rule-who">Sheets is the truth</p>
+        <p class="rule-does">Every service, package and price comes from <strong>the business&rsquo;s own spreadsheet</strong>. Edit it and the bot changes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Watch one message travel through</h2>
+
+    <div class="controls">
+      <div class="scenarios" role="group" aria-label="Choose a scenario">
+        <button type="button" data-scenario="0" aria-pressed="true">A customer answers</button>
+        <button type="button" data-scenario="1" aria-pressed="false">A made-up answer</button>
+        <button type="button" data-scenario="2" aria-pressed="false">A question mid-quote</button>
+      </div>
+      <div class="transport">
+        <button type="button" class="play" id="play">Play</button>
+        <button type="button" id="prev" aria-label="Previous step">&larr;</button>
+        <button type="button" id="next" aria-label="Next step">&rarr;</button>
+        <span class="step-count" id="count">1 / 10</span>
+      </div>
+    </div>
+
+    <figure style="margin:0">
+      <div class="stage-wrap">
+        <svg class="flow" viewBox="0 0 1000 500" role="img"
+             aria-label="A message travels from Instagram through the webhook, is understood by Gemini, validated and decided by Python against Google Sheets, then worded and sent back.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" opacity="0.55"></path>
+            </marker>
+          </defs>
+
+          <g color="var(--line-firm)">
+            <line class="wire" x1="230" y1="60"  x2="272" y2="60"  marker-end="url(#ar)"></line>
+            <line class="wire" x1="480" y1="60"  x2="522" y2="60"  marker-end="url(#ar)"></line>
+            <line class="wire" x1="730" y1="60"  x2="772" y2="60"  marker-end="url(#ar)"></line>
+            <line class="wire" x1="880" y1="89"  x2="880" y2="153" marker-end="url(#ar)"></line>
+            <line class="wire" x1="780" y1="190" x2="738" y2="190" marker-end="url(#ar)"></line>
+            <line class="wire" x1="530" y1="190" x2="488" y2="190" marker-end="url(#ar)"></line>
+            <line class="wire" x1="380" y1="219" x2="380" y2="393" marker-end="url(#ar)"></line>
+            <line class="wire" x1="480" y1="430" x2="522" y2="430" marker-end="url(#ar)"></line>
+            <line class="wire" x1="730" y1="430" x2="772" y2="430" marker-end="url(#ar)"></line>
+          </g>
+
+          <path class="wire-dash" id="dashA" d="M 880 219 L 880 262 L 830 262 L 830 290"></path>
+          <path class="wire-dash" id="dashB" d="M 630 219 L 630 290"></path>
+          <text class="wire-label" x="868" y="252" text-anchor="end">reads the real list</text>
+
+          <g class="node" data-i="0" data-tone="plain">
+            <rect x="30" y="31" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="130" y="56" text-anchor="middle">Customer sends</text>
+            <text class="n-file"  x="130" y="74" text-anchor="middle">Instagram DM</text>
+          </g>
+          <g class="node" data-i="1" data-tone="plain">
+            <rect x="280" y="31" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="380" y="56" text-anchor="middle">Arrives</text>
+            <text class="n-file"  x="380" y="74" text-anchor="middle">main.py</text>
+          </g>
+          <g class="node" data-i="2" data-tone="plain">
+            <rect x="530" y="31" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="630" y="56" text-anchor="middle">Unpacked</text>
+            <text class="n-file"  x="630" y="74" text-anchor="middle">meta_webhook_parser_v3</text>
+          </g>
+          <g class="node" data-i="3" data-tone="plain">
+            <rect x="780" y="31" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="880" y="56" text-anchor="middle">Who is this?</text>
+            <text class="n-file"  x="880" y="74" text-anchor="middle">session_repository_v3</text>
+          </g>
+
+          <g class="node" data-i="4" data-tone="lang">
+            <rect x="780" y="161" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="880" y="186" text-anchor="middle">What did they mean?</text>
+            <text class="n-file"  x="880" y="204" text-anchor="middle">gemini_semantic_adapter</text>
+          </g>
+          <g class="node" data-i="5" data-tone="logic">
+            <rect x="530" y="161" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="630" y="186" text-anchor="middle">Is it allowed?</text>
+            <text class="n-file"  x="630" y="204" text-anchor="middle">conversation_orchestrator</text>
+          </g>
+          <g class="node" data-i="6" data-tone="logic">
+            <rect x="280" y="161" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="380" y="186" text-anchor="middle">What changes?</text>
+            <text class="n-file"  x="380" y="204" text-anchor="middle">conversation_state_machine</text>
+          </g>
+
+          <g class="node" data-i="10" data-tone="data">
+            <rect x="605" y="290" width="300" height="56" rx="2"></rect>
+            <text class="n-title" x="755" y="314" text-anchor="middle">Google Sheets</text>
+            <text class="n-file"  x="755" y="332" text-anchor="middle">services &middot; packages &middot; prices &middot; FAQs</text>
+          </g>
+
+          <g class="node" data-i="7" data-tone="plain">
+            <rect x="280" y="401" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="380" y="426" text-anchor="middle">Put into words</text>
+            <text class="n-file"  x="380" y="444" text-anchor="middle">customer_response_renderer_v3</text>
+          </g>
+          <g class="node" data-i="8" data-tone="plain">
+            <rect x="530" y="401" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="630" y="426" text-anchor="middle">Sent back</text>
+            <text class="n-file"  x="630" y="444" text-anchor="middle">instagram_sender_v3</text>
+          </g>
+          <g class="node" data-i="9" data-tone="plain">
+            <rect x="780" y="401" width="200" height="58" rx="2"></rect>
+            <text class="n-title" x="880" y="426" text-anchor="middle">Customer reads</text>
+            <text class="n-file"  x="880" y="444" text-anchor="middle">Instagram DM</text>
+          </g>
+
+          <g id="packet" transform="translate(130,60)">
+            <circle class="halo" r="17"></circle>
+            <circle r="7"></circle>
+          </g>
+        </svg>
+      </div>
+
+      <div class="caption">
+        <div class="cap-main">
+          <p class="cap-step" id="capStep">Step 1 of 10</p>
+          <h3 class="cap-title" id="capTitle">Customer sends</h3>
+          <p class="cap-say" id="capSay">&nbsp;</p>
+        </div>
+        <div class="cap-side">
+          <div>
+            <p class="side-label">The message right now</p>
+            <p class="side-val" id="capPayload">&nbsp;</p>
+          </div>
+          <div>
+            <p class="side-label">Conversation state</p>
+            <p class="side-val" id="capState">&nbsp;</p>
+          </div>
+        </div>
+      </div>
+
+      <figcaption style="margin-top:12px;font-size:15px;color:var(--ink-muted);max-width:70ch">
+        Solid arrows are the message moving. The dashed green lines are lookups, not
+        hops &mdash; both the model and the validator read the real service list from the
+        spreadsheet, so neither can work from an invented one.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>So what is actually in the folder</h2>
+    <div class="folder">
+      <div class="fold">
+        <h3>Getting the message in and out</h3>
+        <p>Unwrapping Instagram&rsquo;s payload, remembering whose conversation it is, sending the reply. No thinking happens here.</p>
+        <code>main.py &middot; meta_webhook_parser_v3.py &middot; instagram_channel_adapter_v3.py &middot; instagram_sender_v3.py &middot; session_repository_v3.py</code>
+      </div>
+      <div class="fold">
+        <h3>Working out what to do</h3>
+        <p>The hub. Asks the model what a message meant, checks the answer, then decides what &mdash; if anything &mdash; changes.</p>
+        <code>conversation_orchestrator.py &middot; conversation_state_machine.py &middot; event_normalizer.py &middot; semantic_contract.py</code>
+      </div>
+      <div class="fold">
+        <h3>The business&rsquo;s own facts</h3>
+        <p>Prices, packages, FAQs. Read live from the spreadsheet with a five-minute cache, so a price change needs no developer.</p>
+        <code>sheets_service.py &middot; business_knowledge_service.py &middot; quote_service.py</code>
+      </div>
+      <div class="fold">
+        <h3>Everything after the quote</h3>
+        <p>Saving the lead, emailing the customer and the owner, passing them to a human, taking a callback number.</p>
+        <code>lead_persistence_adapter_v3.py &middot; email_delivery_adapter_v3.py &middot; handoff_callback_service_v3.py</code>
+      </div>
+    </div>
+  </section>
+
+  <footer>30 runtime modules &middot; 9 offline test suites &middot; FastAPI on Cloud Run</footer>
+</div>
+
+<script>
+  var POS = [
+    [130, 60], [380, 60], [630, 60], [880, 60],
+    [880, 190], [630, 190], [380, 190],
+    [380, 430], [630, 430], [880, 430],
+    [755, 318]
+  ];
+
+  var SCENARIOS = [
+    {
+      steps: [
+        { n: 0, tone: "plain", title: "Customer sends",
+          say: "Someone has already tapped <strong>Get a Quote</strong> and been asked which service they want. They type one word.",
+          payload: "“Wedding”", state: "QUOTE_SERVICE — waiting for a service" },
+        { n: 1, tone: "plain", title: "It arrives",
+          say: "Meta posts the message to the server. This file deliberately does <strong>no thinking</strong> — it hands the payload straight on.",
+          payload: "POST /instagram/webhook", state: "QUOTE_SERVICE" },
+        { n: 2, tone: "plain", title: "It gets unpacked",
+          say: "Instagram’s payload is deeply nested JSON. This pulls out the only three things that matter.",
+          payload: "sender · message id · “Wedding”", state: "QUOTE_SERVICE" },
+        { n: 3, tone: "plain", title: "Who is this?",
+          say: "Their conversation is loaded. The bot remembers it asked them for a service, so it knows what this reply is answering.",
+          payload: "“Wedding”", state: "QUOTE_SERVICE — expecting: service" },
+        { n: 4, tone: "lang", title: "What did they mean?",
+          say: "Gemini reads it and reports the <strong>meaning</strong> — nothing more. It is handed the real service list from the spreadsheet, so it cannot invent one.",
+          payload: "FIELD_VALUE · service = Wedding", state: "QUOTE_SERVICE", ptone: "lang", dash: "A" },
+        { n: 5, tone: "logic", title: "Is it allowed?",
+          say: "Python looks the value up in the approved list rather than trusting the model. Wedding is genuinely a service, so it passes.",
+          payload: "Wedding ✓ in Wedding, Birthday, Portrait, Event", state: "QUOTE_SERVICE", ptone: "logic", dash: "B" },
+        { n: 6, tone: "logic", title: "What changes?",
+          say: "The only code permitted to change anything. It records the service and moves the conversation to the next question.",
+          payload: "set service = Wedding", state: "QUOTE_SERVICE → QUOTE_PACKAGE", ptone: "logic" },
+        { n: 7, tone: "plain", title: "Put into words",
+          say: "The decision becomes a sentence. Basic and Premium are read from the spreadsheet, not written by the model.",
+          payload: "ask for: package", state: "QUOTE_PACKAGE" },
+        { n: 8, tone: "plain", title: "Sent back",
+          say: "Posted to Instagram as a message with two tappable buttons.",
+          payload: "text + quick replies", state: "QUOTE_PACKAGE" },
+        { n: 9, tone: "plain", title: "Customer reads",
+          say: "“Which package would you like to go with: Basic or Premium?” — about two seconds after they hit send.",
+          payload: "reply delivered", state: "QUOTE_PACKAGE — waiting" }
+      ]
+    },
+    {
+      steps: [
+        { n: 0, tone: "plain", title: "Customer sends",
+          say: "They have picked Wedding and been offered Basic or Premium. Instead they type a package that <strong>does not exist</strong>.",
+          payload: "“Deluxe please”", state: "QUOTE_PACKAGE — waiting for a package" },
+        { n: 1, tone: "plain", title: "It arrives", say: "Same path in. Nothing here knows or cares what the message says.",
+          payload: "POST /instagram/webhook", state: "QUOTE_PACKAGE" },
+        { n: 2, tone: "plain", title: "It gets unpacked", say: "Sender and text pulled out of Meta’s payload.",
+          payload: "sender · “Deluxe please”", state: "QUOTE_PACKAGE" },
+        { n: 3, tone: "plain", title: "Who is this?",
+          say: "Their conversation is loaded. Service is already Wedding, and a package is what is being asked for.",
+          payload: "service = Wedding", state: "QUOTE_PACKAGE — expecting: package" },
+        { n: 4, tone: "lang", title: "What did they mean?",
+          say: "Gemini hears a package name and reports it honestly. <strong>It is not wrong</strong> — it is reporting meaning, which is its only job.",
+          payload: "FIELD_VALUE · package = Deluxe", state: "QUOTE_PACKAGE", ptone: "lang", dash: "A" },
+        { n: 5, tone: "stop", title: "Rejected",
+          say: "Here is the whole point. Python looks up Wedding’s real packages and Deluxe is not among them, so the value <strong>never enters the quote</strong>.",
+          payload: "Deluxe ✗ — Wedding has Basic, Premium", state: "QUOTE_PACKAGE", ptone: "stop", dash: "B" },
+        { n: 6, tone: "logic", title: "Nothing changes",
+          say: "The state machine is told the value was refused. It changes nothing at all — the conversation stays exactly where it was.",
+          payload: "package still empty", state: "QUOTE_PACKAGE → QUOTE_PACKAGE", ptone: "logic" },
+        { n: 7, tone: "plain", title: "Put into words",
+          say: "The refusal is explained rather than swallowed. Saying nothing would read as the bot ignoring them.",
+          payload: "reject + real options", state: "QUOTE_PACKAGE" },
+        { n: 8, tone: "plain", title: "Sent back", say: "One message, straight back.",
+          payload: "text + quick replies", state: "QUOTE_PACKAGE" },
+        { n: 9, tone: "plain", title: "Customer reads",
+          say: "“Deluxe is not an available package. Please choose Basic, Premium.” No wrong price was ever calculated.",
+          payload: "reply delivered", state: "QUOTE_PACKAGE — still waiting" }
+      ]
+    },
+    {
+      steps: [
+        { n: 0, tone: "plain", title: "Customer sends",
+          say: "Mid-quote, they stop and ask something. A rigid form would break here.",
+          payload: "“what’s the difference between them?”", state: "QUOTE_PACKAGE — waiting for a package" },
+        { n: 1, tone: "plain", title: "It arrives", say: "Same path in, as always.",
+          payload: "POST /instagram/webhook", state: "QUOTE_PACKAGE" },
+        { n: 2, tone: "plain", title: "It gets unpacked", say: "Sender and text pulled out.",
+          payload: "sender · the question", state: "QUOTE_PACKAGE" },
+        { n: 3, tone: "plain", title: "Who is this?",
+          say: "Their conversation is loaded, including the fact that Wedding is already chosen — which is what makes the answer specific.",
+          payload: "service = Wedding", state: "QUOTE_PACKAGE — expecting: package" },
+        { n: 4, tone: "lang", title: "What did they mean?",
+          say: "Gemini classifies it as a question about the business, not an answer to the question being asked.",
+          payload: "BUSINESS_QUESTION", state: "QUOTE_PACKAGE", ptone: "lang", dash: "A" },
+        { n: 5, tone: "logic", title: "Nothing to validate",
+          say: "No value was given, so there is nothing to check. The current question is <strong>remembered, not abandoned</strong>.",
+          payload: "park QUOTE_PACKAGE, handle question", state: "QUOTE_PACKAGE → BUSINESS_INTERRUPT", ptone: "logic", dash: "B" },
+        { n: 10, tone: "data", title: "Answered from the spreadsheet",
+          say: "The comparison is built from the actual Wedding rows — hours, prices, extra-hour rate. <strong>The model never writes a number.</strong>",
+          payload: "Basic £950 / 4h · Premium £1200 / 6h", state: "BUSINESS_INTERRUPT", ptone: "logic" },
+        { n: 7, tone: "plain", title: "Put into words",
+          say: "The facts are worded plainly, and the parked question is added back on the end so the customer is not left hanging.",
+          payload: "answer + repeat the question", state: "BUSINESS_INTERRUPT → QUOTE_PACKAGE" },
+        { n: 8, tone: "plain", title: "Sent back", say: "Both parts arrive as one reply.",
+          payload: "text + quick replies", state: "QUOTE_PACKAGE" },
+        { n: 9, tone: "plain", title: "Customer reads",
+          say: "The real numbers, then “Which package would you like to go with?” — exactly where they left off.",
+          payload: "reply delivered", state: "QUOTE_PACKAGE — waiting" }
+      ]
+    }
+  ];
+
+  var nodes   = Array.prototype.slice.call(document.querySelectorAll(".node"));
+  var packet  = document.getElementById("packet");
+  var dashA   = document.getElementById("dashA");
+  var dashB   = document.getElementById("dashB");
+  var capStep = document.getElementById("capStep");
+  var capTitle= document.getElementById("capTitle");
+  var capSay  = document.getElementById("capSay");
+  var capPay  = document.getElementById("capPayload");
+  var capState= document.getElementById("capState");
+  var playBtn = document.getElementById("play");
+  var countEl = document.getElementById("count");
+
+  var scenario = 0, step = 0, timer = null;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function render() {
+    var s = SCENARIOS[scenario].steps[step];
+
+    nodes.forEach(function (g) {
+      g.classList.toggle("on", Number(g.getAttribute("data-i")) === s.n);
+    });
+    var active = nodes.filter(function (g) {
+      return Number(g.getAttribute("data-i")) === s.n;
+    })[0];
+    if (active) active.setAttribute("data-tone", s.tone);
+
+    var p = POS[s.n];
+    packet.setAttribute("transform", "translate(" + p[0] + "," + p[1] + ")");
+    packet.className.baseVal = s.ptone || "";
+
+    dashA.classList.toggle("lit", s.dash === "A");
+    dashB.classList.toggle("lit", s.dash === "B" || s.n === 10);
+
+    var total = SCENARIOS[scenario].steps.length;
+    capStep.textContent = "Step " + (step + 1) + " of " + total;
+    countEl.textContent = (step + 1) + " / " + total;
+    capTitle.textContent = s.title;
+    capSay.innerHTML = s.say;
+    capPay.textContent = s.payload;
+    capPay.className = "side-val tone-" + (s.ptone || (s.tone === "data" ? "data" : ""));
+    capState.textContent = s.state;
+  }
+
+  function go(i) {
+    var total = SCENARIOS[scenario].steps.length;
+    step = (i + total) % total;
+    render();
+  }
+
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    playBtn.textContent = "Play";
+    playBtn.setAttribute("aria-pressed", "false");
+  }
+
+  function play() {
+    if (timer) { stop(); return; }
+    playBtn.textContent = "Pause";
+    playBtn.setAttribute("aria-pressed", "true");
+    timer = setInterval(function () {
+      var total = SCENARIOS[scenario].steps.length;
+      if (step >= total - 1) { stop(); return; }
+      go(step + 1);
+    }, reduced ? 2600 : 1900);
+  }
+
+  playBtn.addEventListener("click", play);
+  document.getElementById("next").addEventListener("click", function () { stop(); go(step + 1); });
+  document.getElementById("prev").addEventListener("click", function () { stop(); go(step - 1); });
+
+  document.querySelectorAll("[data-scenario]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      stop();
+      scenario = Number(b.getAttribute("data-scenario"));
+      document.querySelectorAll("[data-scenario]").forEach(function (o) {
+        o.setAttribute("aria-pressed", o === b ? "true" : "false");
+      });
+      go(0);
+    });
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowRight") { stop(); go(step + 1); }
+    if (e.key === "ArrowLeft")  { stop(); go(step - 1); }
+  });
+
+  render();
+</script>
+
+</body>
+</html>
