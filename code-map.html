@@ -1,0 +1,1263 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Quote Bot Code Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page-bg:#f7f8fa;
+    --ink:#101828;
+    --ink-dim:#475467;
+    --ink-faint:#98a2b3;
+    --card:#ffffff;
+    --card-border:#eef1f5;
+    --rule:#e6eaf0;
+    --shadow:0 1px 2px rgba(16,24,40,.04), 0 4px 14px rgba(16,24,40,.05);
+    --shadow-lift:0 2px 6px rgba(16,24,40,.06), 0 12px 28px rgba(16,24,40,.10);
+    --blue:#2563eb;   --blue-tint:#eaf1fd;
+    --purple:#7c3aed; --purple-tint:#f1edfc;
+    --green:#059669;  --green-tint:#e9f9f1;
+    --pink:#db2777;   --pink-tint:#fdedf3;
+    --amber:#d97706;  --amber-tint:#fef3e0;
+    --accent:#4f46e5; --accent-tint:#eeedfd; --accent-soft:#b9b5f2;
+    --arrow:#aab4c5;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    background:var(--page-bg);
+    color:var(--ink);
+    font-family:'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size:14px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .page{
+    max-width:1960px;
+    margin:0 auto;
+    padding-inline:20px;
+    padding-block:26px 40px;
+    transition:padding-bottom .2s ease;
+  }
+  body.drawer-open .page{padding-bottom:min(52vh, 460px)}
+
+  /* ---------- header ---------- */
+  .top{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:20px; flex-wrap:wrap; margin-bottom:6px;
+  }
+  .brand{display:flex; gap:14px; align-items:flex-start}
+  .brand-mark{
+    width:44px; height:44px; border-radius:12px; flex:none;
+    background:linear-gradient(135deg,#f58529,#dd2a7b 55%,#8134af);
+    display:grid; place-items:center; color:#fff;
+  }
+  .brand-mark svg{width:24px;height:24px}
+  h1{
+    margin:0; font-size:27px; line-height:1.15; font-weight:800;
+    letter-spacing:-.02em; text-wrap:balance;
+  }
+  .sub{margin:4px 0 0; color:var(--ink-dim); font-size:14px; max-width:62ch}
+  .counts{
+    display:flex; gap:0; align-items:stretch; flex-wrap:wrap;
+    border:1px solid var(--card-border); background:var(--card);
+    border-radius:12px; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .count{padding:9px 16px; border-right:1px solid var(--card-border)}
+  .count:last-child{border-right:0}
+  .count b{display:block; font-size:17px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+  .count span{
+    display:block; font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-faint);
+  }
+
+  .howto{
+    margin:16px 0 18px; padding:11px 16px;
+    background:var(--accent-tint); border:1px solid #ddd9fb; border-radius:11px;
+    color:#3f3a99; font-size:13.5px; font-weight:500;
+    display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  }
+  .howto svg{width:17px;height:17px;flex:none}
+  .howto .kbd{
+    font-family:'IBM Plex Mono', monospace; font-size:11px;
+    background:#fff; border:1px solid #ddd9fb; border-radius:5px; padding:1px 6px;
+  }
+
+  /* ---------- lanes ---------- */
+  .lanes{
+    display:grid;
+    grid-template-columns:1fr 1.25fr 3.5fr 1fr;
+    gap:14px;
+    align-items:start;
+  }
+  .lane{
+    border-radius:16px; padding:16px 14px 18px;
+    border:1px solid transparent; min-width:0;
+  }
+  .lane.blue{background:var(--blue-tint); border-color:#d9e6fb}
+  .lane.purple{background:var(--purple-tint); border-color:#e5dcfa}
+  .lane.green{background:var(--green-tint); border-color:#d3f0e2}
+  .lane.pink{background:var(--pink-tint); border-color:#fadfeb}
+
+  .lane-title{margin:0; font-size:16px; font-weight:800; letter-spacing:-.01em}
+  .lane.blue .lane-title{color:var(--blue)}
+  .lane.purple .lane-title{color:var(--purple)}
+  .lane.green .lane-title{color:var(--green)}
+  .lane.pink .lane-title{color:var(--pink)}
+  .lane-sub{margin:2px 0 14px; font-size:12px; color:var(--ink-dim)}
+
+  .stack{display:flex; flex-direction:column; gap:34px}
+
+  /* ---------- blocks ---------- */
+  .block{
+    position:relative; display:block; width:100%; text-align:left;
+    font:inherit; color:inherit; cursor:pointer;
+    background:var(--card); border:1px solid var(--card-border);
+    border-radius:13px; padding:15px 15px 14px;
+    box-shadow:var(--shadow);
+    transition:box-shadow .16s ease, border-color .16s ease, transform .16s ease, opacity .18s ease;
+  }
+  .block:hover{box-shadow:var(--shadow-lift); transform:translateY(-2px); border-color:#dfe4ec}
+  .block:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  .ico{
+    width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+    margin-bottom:11px; color:#fff;
+  }
+  .ico svg{width:18px;height:18px}
+  .ico.soft{background:var(--blue-tint); color:var(--blue)}
+  .ico.soft-p{background:var(--purple-tint); color:var(--purple)}
+  .ico.soft-g{background:var(--green-tint); color:var(--green)}
+  .ico.soft-pk{background:var(--pink-tint); color:var(--pink)}
+  .ico.soft-a{background:var(--amber-tint); color:var(--amber)}
+  .ico.ig{background:linear-gradient(135deg,#f58529,#dd2a7b 55%,#8134af)}
+  .ico.meta{background:#1877f2}
+  .ico.cloud{background:linear-gradient(135deg,#34a853,#4285f4)}
+  .ico.sheets{background:#0f9d58}
+  .ico.gmail{background:#ea4335}
+
+  .block h3{margin:0; font-size:14.5px; font-weight:700; letter-spacing:-.01em; line-height:1.3}
+  .block p{margin:6px 0 0; font-size:12.5px; color:var(--ink-dim); line-height:1.5}
+
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; margin-top:11px;
+    font-family:'IBM Plex Mono', ui-monospace, monospace;
+    font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    padding:3px 8px; border-radius:20px;
+    background:var(--accent-tint); color:#4239b8; border:1px solid #ddd9fb;
+  }
+  .pill.none{background:#f4f6f9; color:var(--ink-faint); border:1px dashed #d6dce5}
+  .pill .dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+
+  /* selection states */
+  .lanes.armed .block:not(.is-sel):not(.is-rel){opacity:.3}
+  .block.is-sel{
+    border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-tint), var(--shadow-lift);
+  }
+  .block.is-rel{border-color:var(--accent-soft); box-shadow:0 0 0 2px #efedfd}
+  .block.is-sel .pill{background:var(--accent); color:#fff; border-color:var(--accent)}
+
+  /* vertical connector arrows in the stacked lanes */
+  .stack .block:not(:first-child)::before{
+    content:''; position:absolute; left:50%; top:-26px;
+    width:1.5px; height:18px; background:var(--arrow); transform:translateX(-50%);
+  }
+  .stack .block:not(:first-child)::after{
+    content:''; position:absolute; left:50%; top:-10px;
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--arrow); transform:translateX(-50%);
+  }
+
+  /* ---------- core lane internals ---------- */
+  .backend{
+    background:var(--card); border:1px solid var(--card-border);
+    border-radius:15px; padding:16px; box-shadow:var(--shadow); margin-bottom:14px;
+  }
+  .backend-head{display:flex; gap:12px; align-items:center; margin-bottom:14px}
+  .backend-head .ico{margin-bottom:0; width:38px; height:38px}
+  .backend-head h3{margin:0; font-size:17px; font-weight:800; letter-spacing:-.015em}
+  .backend-head p{margin:2px 0 0; font-size:12.5px; color:var(--ink-dim)}
+  button.backend-head{
+    width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer;
+    background:transparent; border:1px solid transparent; border-radius:12px;
+    padding:8px; margin:-8px -8px 8px; transition:background .16s ease, border-color .16s ease, opacity .18s ease;
+  }
+  button.backend-head:hover{background:#f8f9fc; border-color:var(--card-border)}
+  button.backend-head:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  button.backend-head.is-sel{background:var(--accent-tint); border-color:var(--accent)}
+  .lanes.armed button.backend-head:not(.is-sel):not(.is-rel){opacity:.35}
+
+  .steps{display:grid; grid-template-columns:repeat(6,1fr); gap:20px}
+  .step{
+    position:relative; display:block; width:100%; text-align:left; font:inherit; color:inherit;
+    cursor:pointer; background:#fbfcfe; border:1px solid var(--card-border);
+    border-radius:11px; padding:13px 11px 12px;
+    transition:box-shadow .16s ease, border-color .16s ease, transform .16s ease, opacity .18s ease;
+  }
+  .step:hover{background:#fff; box-shadow:var(--shadow-lift); transform:translateY(-2px)}
+  .step:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .step .ico{width:28px;height:28px;border-radius:8px;margin-bottom:9px}
+  .step .ico svg{width:15px;height:15px}
+  .step h4{margin:0; font-size:12.5px; font-weight:700; line-height:1.3; letter-spacing:-.005em}
+  .step p{margin:5px 0 0; font-size:11.5px; color:var(--ink-dim); line-height:1.45}
+  .step .pill{margin-top:9px; font-size:9px; padding:2px 7px}
+  .steps .step:not(:last-child)::after{
+    content:''; position:absolute; right:-13px; top:34px;
+    border-top:4px solid transparent; border-bottom:4px solid transparent;
+    border-left:6px solid var(--arrow);
+  }
+  .lanes.armed .step:not(.is-sel):not(.is-rel){opacity:.3}
+  .step.is-sel{border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px var(--accent-tint), var(--shadow-lift)}
+  .step.is-rel{border-color:var(--accent-soft); background:#fff; box-shadow:0 0 0 2px #efedfd}
+  .step.is-sel .pill{background:var(--accent); color:#fff; border-color:var(--accent)}
+
+  /* the orchestrator spanning bar */
+  .spanwrap{margin-top:14px}
+  .span-brace{height:7px; border:1.5px solid var(--accent-soft); border-bottom:0; border-radius:7px 7px 0 0; opacity:.8}
+  .spanbar{
+    display:block; width:100%; text-align:left; font:inherit; color:inherit; cursor:pointer;
+    margin-top:-1px; background:var(--accent-tint); border:1px solid #ddd9fb;
+    border-radius:0 0 11px 11px; padding:10px 14px;
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    transition:box-shadow .16s ease, border-color .16s ease, opacity .18s ease;
+  }
+  .spanbar:hover{box-shadow:var(--shadow-lift)}
+  .spanbar:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .spanbar code{font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500; color:#3f3a99}
+  .spanbar span{font-size:12px; color:#5b55c4}
+  .spanbar .pill{margin-top:0; margin-left:auto}
+  .lanes.armed .spanbar:not(.is-sel):not(.is-rel){opacity:.35}
+  .spanbar.is-sel{border-color:var(--accent); box-shadow:0 0 0 3px #e4e1fb}
+
+  .code-callout{
+    margin-top:16px; background:#111726; border-radius:12px; padding:15px 17px; overflow-x:auto;
+  }
+  .code-callout .cc-label{
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:#8b97ad;
+    letter-spacing:.05em; margin-bottom:9px;
+  }
+  .code-callout pre{
+    margin:0; font-family:'IBM Plex Mono', monospace; font-size:11.5px; line-height:1.7; color:#cfd7e6;
+  }
+  .k{color:#7dd3a8} .v{color:#f0b37e} .n{color:#8ab4f8} .b{color:#c792ea}
+
+  .breakout{display:grid; grid-template-columns:1.6fr 1.05fr 1.05fr 1.05fr; gap:13px}
+  .ds-card{
+    background:var(--card); border:1px solid var(--card-border); border-radius:13px;
+    padding:14px; box-shadow:var(--shadow);
+  }
+  .ds-card > h3{margin:0; font-size:13.5px; font-weight:700}
+  .ds-card > p{margin:2px 0 12px; font-size:11.5px; color:var(--ink-dim)}
+  .ds-pair{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+  .mini{
+    position:relative; display:block; width:100%; text-align:left; font:inherit; color:inherit;
+    cursor:pointer; background:#fbfcfe; border:1px solid var(--card-border);
+    border-radius:10px; padding:12px 11px;
+    transition:box-shadow .16s ease, border-color .16s ease, transform .16s ease, opacity .18s ease;
+  }
+  .mini:hover{background:#fff; box-shadow:var(--shadow-lift); transform:translateY(-2px)}
+  .mini:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .mini.risk{border:1.5px dashed #f2cd92; background:#fffcf6}
+  .mini .ico{width:26px;height:26px;border-radius:7px;margin-bottom:8px}
+  .mini .ico svg{width:14px;height:14px}
+  .mini h4{margin:0; font-size:12px; font-weight:700; line-height:1.3}
+  .mini p{margin:4px 0 0; font-size:11px; color:var(--ink-dim); line-height:1.45}
+  .mini .pill{margin-top:8px; font-size:9px; padding:2px 7px}
+  .lanes.armed .mini:not(.is-sel):not(.is-rel){opacity:.3}
+  .mini.is-sel{border-color:var(--accent); background:#fff; box-shadow:0 0 0 3px var(--accent-tint), var(--shadow-lift)}
+  .mini.is-rel{border-color:var(--accent-soft); background:#fff; box-shadow:0 0 0 2px #efedfd}
+  .mini.is-sel .pill{background:var(--accent); color:#fff; border-color:var(--accent)}
+
+  .rule-callout{
+    margin-top:14px; background:#fffaf0; border:1px solid #f6e3bd; border-radius:12px;
+    padding:14px 16px; display:flex; gap:12px; align-items:flex-start;
+  }
+  .rule-callout .ico{width:28px;height:28px;border-radius:8px;margin-bottom:0;flex:none}
+  .rule-callout p{margin:0; font-size:13px; color:#7c5510; line-height:1.55}
+  .rule-callout strong{color:#6b4509}
+
+  /* ---------- groups legend ---------- */
+  .legend{margin-top:26px}
+  .legend-head{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:12px}
+  .legend-head h2{margin:0; font-size:17px; font-weight:800; letter-spacing:-.015em}
+  .legend-head p{margin:0; font-size:13px; color:var(--ink-dim)}
+  .chips{display:grid; grid-template-columns:repeat(auto-fill, minmax(215px,1fr)); gap:10px}
+  .chip{
+    display:flex; gap:11px; align-items:center; width:100%; text-align:left;
+    font:inherit; color:inherit; cursor:pointer;
+    background:var(--card); border:1px solid var(--card-border); border-radius:11px;
+    padding:11px 13px; box-shadow:var(--shadow);
+    transition:box-shadow .16s ease, border-color .16s ease, transform .16s ease;
+  }
+  .chip:hover{box-shadow:var(--shadow-lift); transform:translateY(-2px)}
+  .chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .chip.is-sel{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-tint)}
+  .chip-num{
+    width:26px;height:26px;border-radius:8px;flex:none; display:grid; place-items:center;
+    font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:500;
+    background:var(--accent-tint); color:#4239b8;
+  }
+  .chip.is-sel .chip-num{background:var(--accent); color:#fff}
+  .chip-body{min-width:0}
+  .chip-body b{display:block; font-size:12.5px; font-weight:700; line-height:1.25}
+  .chip-body span{display:block; font-size:11px; color:var(--ink-faint); margin-top:1px}
+
+  /* ---------- drawer ---------- */
+  .drawer{
+    position:fixed; left:0; right:0; bottom:0; z-index:40;
+    background:var(--card); border-top:1px solid var(--rule);
+    box-shadow:0 -6px 30px rgba(16,24,40,.13);
+    border-radius:16px 16px 0 0;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    max-height:min(58vh, 540px);
+    display:flex; flex-direction:column;
+    animation:rise .2s ease;
+  }
+  @keyframes rise{from{transform:translateY(14px); opacity:0} to{transform:none; opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    .drawer{animation:none}
+    .block,.step,.mini,.chip{transition:none}
+  }
+  .drawer-head{
+    display:flex; gap:14px; align-items:flex-start;
+    padding:15px 22px 12px; border-bottom:1px solid var(--rule);
+  }
+  .drawer-head .kicker{
+    font-family:'IBM Plex Mono', monospace; font-size:9.5px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--accent); font-weight:500;
+  }
+  .drawer-head h2{margin:2px 0 0; font-size:18px; font-weight:800; letter-spacing:-.02em}
+  .drawer-head p{margin:4px 0 0; font-size:13px; color:var(--ink-dim); max-width:80ch}
+  .drawer-close{
+    margin-left:auto; flex:none; width:32px; height:32px; border-radius:9px;
+    border:1px solid var(--card-border); background:#fff; color:var(--ink-dim);
+    cursor:pointer; display:grid; place-items:center; font-size:17px; line-height:1;
+  }
+  .drawer-close:hover{background:#f6f8fb; color:var(--ink)}
+  .drawer-close:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .drawer-body{overflow-y:auto; padding:14px 22px 20px}
+  .note{
+    margin:0 0 15px; padding:11px 14px; background:#f8f9fc;
+    border-left:2.5px solid var(--accent-soft); border-radius:0 9px 9px 0;
+    font-size:13px; color:var(--ink-dim); line-height:1.6; max-width:96ch;
+  }
+  .files{display:grid; grid-template-columns:repeat(auto-fill, minmax(330px,1fr)); gap:9px; align-items:start}
+  .file{
+    background:#fbfcfe; border:1px solid var(--card-border); border-radius:10px; overflow:hidden;
+    transition:border-color .16s ease, box-shadow .16s ease;
+  }
+  .file.open{border-color:var(--accent-soft); box-shadow:0 0 0 2px #efedfd; background:#fff}
+  .file-head{
+    display:block; width:100%; text-align:left; font:inherit; color:inherit;
+    background:transparent; border:0; cursor:pointer; padding:11px 13px;
+  }
+  .file-head:hover{background:#f3f5fb}
+  .file-head:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+  .chev{
+    margin-left:7px; color:var(--ink-faint); flex:none; font-size:11px; line-height:1;
+    transition:transform .18s ease; display:inline-block;
+  }
+  .file.open .chev{transform:rotate(90deg)}
+  .file-body{padding:0 13px 13px; border-top:1px solid var(--card-border)}
+  .sec{margin-top:12px}
+  .sec-h{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; letter-spacing:.05em;
+    color:var(--accent); font-weight:500; margin-bottom:5px;
+  }
+  .sec p{margin:0; font-size:12.5px; color:var(--ink-dim); line-height:1.6}
+  ul.concepts{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+  ul.concepts li{
+    position:relative; padding-left:12px; font-size:12px; line-height:1.6; color:var(--ink-dim);
+  }
+  ul.concepts li::before{
+    content:''; position:absolute; left:0; top:7.5px;
+    width:4px; height:4px; border-radius:50%; background:var(--accent-soft);
+  }
+  ul.concepts code{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:#3f3a99;
+    background:var(--accent-tint); border-radius:4px; padding:1px 5px; margin-right:2px;
+  }
+  .file-top{display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+  .file-name{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; font-weight:500;
+    color:var(--ink); word-break:break-all;
+  }
+  .file-size{
+    margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+    color:var(--ink-faint); font-variant-numeric:tabular-nums; white-space:nowrap;
+  }
+  .gtag{
+    font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.05em;
+    padding:2px 6px; border-radius:5px; background:var(--accent-tint); color:#4239b8; flex:none;
+  }
+  .file-role{margin:5px 0 0; font-size:12px; color:var(--ink-dim); line-height:1.5}
+  .empty{
+    font-size:13px; color:var(--ink-dim); padding:14px; background:#f8f9fc;
+    border:1px dashed #dde3ec; border-radius:10px;
+  }
+  .where{margin:15px 0 0; font-size:12.5px; color:var(--ink-dim)}
+  .where b{color:var(--ink); font-weight:600}
+
+  footer{
+    margin-top:28px; padding-top:16px; border-top:1px solid var(--rule);
+    display:flex; gap:16px; justify-content:space-between; flex-wrap:wrap;
+    font-size:12px; color:var(--ink-faint);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:1500px){
+    .steps{grid-template-columns:repeat(3,1fr); gap:22px}
+    .steps .step:nth-child(3n)::after{display:none}
+  }
+  @media (max-width:1200px){
+    .lanes{grid-template-columns:1fr 1fr; }
+    .lane.green{grid-column:1 / -1}
+    .lane.pink{grid-column:1 / -1}
+    .breakout{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:760px){
+    .lanes{grid-template-columns:1fr}
+    .lane.green,.lane.pink{grid-column:auto}
+    .steps{grid-template-columns:1fr 1fr; gap:14px}
+    .steps .step::after{display:none}
+    .breakout{grid-template-columns:1fr}
+    .ds-pair{grid-template-columns:1fr}
+    h1{font-size:23px}
+    .drawer{max-height:62vh}
+    .drawer-head,.drawer-body{padding-inline:16px}
+    .files{grid-template-columns:1fr}
+  }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-person" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/>
+  </symbol>
+  <symbol id="i-people" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="8" r="3"/><path d="M2.5 19c0-3.2 2.9-5.2 6.5-5.2s6.5 2 6.5 5.2"/><path d="M16 5.6a3 3 0 0 1 0 5.8"/><path d="M18 13.9c2.1.6 3.5 2.2 3.5 4.3"/>
+  </symbol>
+  <symbol id="i-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/>
+  </symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 3 10.5 13.5"/><path d="M21 3l-6.8 18-3.7-7.5L3 9.8 21 3z"/>
+  </symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 18.5a4.2 4.2 0 0 1-.3-8.4 5.6 5.6 0 0 1 10.8-1.3A4 4 0 0 1 17.6 18.5H7z"/>
+  </symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v9"/><path d="m8.5 8.5 3.5 3.5 3.5-3.5"/><path d="M4 14v4.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V14"/>
+  </symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 13.5A3.5 3.5 0 0 1 16.5 17H9l-4.5 3.5V6.5A3.5 3.5 0 0 1 8 3h8.5A3.5 3.5 0 0 1 20 6.5z"/>
+  </symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.5 13.7 9 19 10.7 13.7 12.4 12 18l-1.7-5.6L5 10.7 10.3 9z"/><path d="M18.5 16.5 19.2 18.6 21.3 19.3 19.2 20 18.5 22 17.8 20 15.7 19.3 17.8 18.6z"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-4.9"/>
+  </symbol>
+  <symbol id="i-calc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7"/><path d="M8.8 12h.01M12 12h.01M15.2 12h.01M8.8 16h.01M12 16h.01M15.2 16h.01"/>
+  </symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V7z"/><path d="M14 3v4.5H18"/><path d="M9 13h6M9 16.5h4"/>
+  </symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9.5h16M4 15h16M9.5 4v16"/>
+  </symbol>
+  <symbol id="i-chip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 3.5v3M14 3.5v3M10 17.5v3M14 17.5v3M3.5 10h3M3.5 14h3M17.5 10h3M17.5 14h3"/>
+  </symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.8 7 7.3 5.2a1.5 1.5 0 0 0 1.8 0L20.2 7"/>
+  </symbol>
+  <symbol id="i-handoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="8.5" cy="7.5" r="3"/><path d="M2.5 19c0-3.2 2.7-5.2 6-5.2"/><path d="M13.5 15.5h7"/><path d="m18 13 2.5 2.5L18 18"/>
+  </symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9.2 17h5.6"/><path d="M10 20.5h4"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.5.4-.8 1-.8 1.6H9.2c0-.6-.3-1.2-.8-1.6A6 6 0 0 1 12 3z"/>
+  </symbol>
+  <symbol id="i-cursor" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="m5 3 5.5 16 2.4-6.6 6.6-2.4z"/>
+  </symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 3v6.2L4.8 18a2 2 0 0 0 1.7 3h11a2 2 0 0 0 1.7-3L14 9.2V3"/><path d="M8.5 3h7"/><path d="M7.4 14h9.2"/>
+  </symbol>
+</svg>
+
+<div class="page">
+
+  <div class="top">
+    <div class="brand">
+      <div class="brand-mark"><svg><use href="#i-instagram"/></svg></div>
+      <div>
+        <h1>Instagram AI Sales &amp; Quote Assistant</h1>
+        <p class="sub">The same architecture picture &mdash; but every block now tells you which files do the work.</p>
+      </div>
+    </div>
+    <div class="counts">
+      <div class="count"><b>50</b><span>files</span></div>
+      <div class="count"><b>31</b><span>app logic</span></div>
+      <div class="count"><b>11</b><span>tests</span></div>
+      <div class="count"><b>8</b><span>docs &amp; config</span></div>
+    </div>
+  </div>
+
+  <p class="howto">
+    <svg><use href="#i-cursor"/></svg>
+    <span>Click any block to see the files behind it &mdash; then click a file for what it does and the Python it uses. Related blocks light up when they share a file. Press <span class="kbd">Esc</span> to clear.</span>
+  </p>
+
+  <div class="lanes" id="lanes">
+
+    <!-- LANE 1 -->
+    <section class="lane blue">
+      <h2 class="lane-title">Customer Channel</h2>
+      <p class="lane-sub">The conversation starts here</p>
+      <div class="stack">
+        <button type="button" class="block" data-block="customer" aria-pressed="false">
+          <div class="ico soft"><svg><use href="#i-person"/></svg></div>
+          <h3>Customer</h3>
+          <p>Sends a DM, asks for a price</p>
+          <span class="pill none"><span class="dot"></span>not your code</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- LANE 2 -->
+    <section class="lane purple">
+      <h2 class="lane-title">Platform Integration</h2>
+      <p class="lane-sub">Instagram receives it and passes it on</p>
+      <div class="stack">
+        <button type="button" class="block" data-block="ig-account" aria-pressed="false">
+          <div class="ico ig"><svg><use href="#i-instagram"/></svg></div>
+          <h3>Instagram Business Account</h3>
+          <p>Receives the customer DM</p>
+          <span class="pill none"><span class="dot"></span>not your code</span>
+        </button>
+        <button type="button" class="block" data-block="webhooks" aria-pressed="false">
+          <div class="ico meta"><svg><use href="#i-send"/></svg></div>
+          <h3>Meta / Instagram Webhooks</h3>
+          <p>Message event pushed to your backend</p>
+          <span class="pill"><span class="dot"></span>1 file</span>
+        </button>
+        <button type="button" class="block" data-block="cloudrun" aria-pressed="false">
+          <div class="ico cloud"><svg><use href="#i-cloud"/></svg></div>
+          <h3>Google Cloud Run</h3>
+          <p>Hosts the backend &mdash; production, europe-west2</p>
+          <span class="pill"><span class="dot"></span>4 files</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- LANE 3 -->
+    <section class="lane green">
+      <h2 class="lane-title">Core AI + Backend Logic</h2>
+      <p class="lane-sub">Read the message, work out the price, write the reply</p>
+
+      <div class="backend">
+        <button type="button" class="backend-head" data-block="fastapi" aria-pressed="false">
+          <div class="ico soft-g"><svg><use href="#i-chip"/></svg></div>
+          <div>
+            <h3>Python / FastAPI Backend</h3>
+            <p>The app itself, and the wiring that builds every piece below</p>
+          </div>
+          <span class="pill" style="margin-left:auto"><span class="dot"></span>2 files</span>
+        </button>
+
+        <div class="steps">
+          <button type="button" class="step" data-block="webhook-receiver" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-inbox"/></svg></div>
+            <h4>Webhook Receiver</h4>
+            <p>Validates and parses the incoming message</p>
+            <span class="pill"><span class="dot"></span>3 files</span>
+          </button>
+          <button type="button" class="step" data-block="conversation-manager" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-chat"/></svg></div>
+            <h4>Conversation Manager</h4>
+            <p>Keeps track of where this chat has got to</p>
+            <span class="pill"><span class="dot"></span>4 files</span>
+          </button>
+          <button type="button" class="step" data-block="gemini" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-sparkle"/></svg></div>
+            <h4>Gemini Structured Extraction</h4>
+            <p>Pulls the real details out of plain English</p>
+            <span class="pill"><span class="dot"></span>4 files</span>
+          </button>
+          <button type="button" class="step" data-block="requirement-checker" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-check"/></svg></div>
+            <h4>Requirement Checker</h4>
+            <p>Works out what is still missing</p>
+            <span class="pill"><span class="dot"></span>5 files</span>
+          </button>
+          <button type="button" class="step" data-block="quote-engine" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-calc"/></svg></div>
+            <h4>Deterministic Quote Engine</h4>
+            <p>Calculates the price in plain Python, not the AI</p>
+            <span class="pill"><span class="dot"></span>3 files</span>
+          </button>
+          <button type="button" class="step" data-block="response-builder" aria-pressed="false">
+            <div class="ico soft-g"><svg><use href="#i-doc"/></svg></div>
+            <h4>Response Builder</h4>
+            <p>Writes the friendly reply, in the right language</p>
+            <span class="pill"><span class="dot"></span>2 files</span>
+          </button>
+        </div>
+
+        <div class="spanwrap">
+          <div class="span-brace"></div>
+          <button type="button" class="spanbar" data-block="orchestrator" aria-pressed="false">
+            <code>conversation_orchestrator.py</code>
+            <span>&mdash; the brain sitting behind all six steps</span>
+            <span class="pill"><span class="dot"></span>1 file &middot; 50.2 KB</span>
+          </button>
+        </div>
+
+        <div class="code-callout">
+          <div class="cc-label">Example structured data from Gemini</div>
+<pre>{
+  <span class="k">"service"</span>: <span class="v">"wedding photography"</span>,
+  <span class="k">"duration_hours"</span>: <span class="n">6</span>,
+  <span class="k">"location"</span>: <span class="v">"London"</span>,
+  <span class="k">"date"</span>: <span class="v">"2026-10-12"</span>,
+  <span class="k">"requirements_complete"</span>: <span class="b">true</span>
+}</pre>
+        </div>
+      </div>
+
+      <div class="breakout">
+        <div class="ds-card">
+          <h3>Data Sources</h3>
+          <p>What the backend actually reads and writes</p>
+          <div class="ds-pair">
+            <button type="button" class="mini" data-block="sheets" aria-pressed="false">
+              <div class="ico sheets"><svg><use href="#i-grid"/></svg></div>
+              <h4>Google Sheets</h4>
+              <p>Pricing, catalogue and every lead &mdash; read and written live</p>
+              <span class="pill"><span class="dot"></span>5 files</span>
+            </button>
+            <button type="button" class="mini risk" data-block="session-memory" aria-pressed="false">
+              <div class="ico soft-a"><svg><use href="#i-doc"/></svg></div>
+              <h4>Session Memory</h4>
+              <p>In-process RAM only &mdash; cleared on restart. Roadmap: Firestore</p>
+              <span class="pill"><span class="dot"></span>1 file</span>
+            </button>
+          </div>
+        </div>
+
+        <button type="button" class="block" data-block="lead-handoff" aria-pressed="false">
+          <div class="ico soft-p"><svg><use href="#i-handoff"/></svg></div>
+          <h3>Lead Logging &amp; Human Handoff</h3>
+          <p>Escalate complex queries, notify the business team</p>
+          <span class="pill"><span class="dot"></span>2 files</span>
+        </button>
+
+        <button type="button" class="block" data-block="gmail" aria-pressed="false">
+          <div class="ico gmail"><svg><use href="#i-mail"/></svg></div>
+          <h3>Gmail &mdash; Email Notifications</h3>
+          <p>Quote confirmation to the customer, new-lead alert to the team</p>
+          <span class="pill"><span class="dot"></span>2 files</span>
+        </button>
+
+        <button type="button" class="block" data-block="business-team" aria-pressed="false">
+          <div class="ico soft-p"><svg><use href="#i-people"/></svg></div>
+          <h3>Business Team / Admin</h3>
+          <p>Review leads, handle complex requests, follow up</p>
+          <span class="pill none"><span class="dot"></span>people, not code</span>
+        </button>
+      </div>
+
+      <div class="rule-callout">
+        <div class="ico soft-a"><svg><use href="#i-bulb"/></svg></div>
+        <p><strong>The rule the whole design turns on:</strong> Gemini understands the request and pulls out structured data, but the final price is calculated only by deterministic Python business rules.</p>
+      </div>
+    </section>
+
+    <!-- LANE 4 -->
+    <section class="lane pink">
+      <h2 class="lane-title">Outputs</h2>
+      <p class="lane-sub">The reply goes back</p>
+      <div class="stack">
+        <button type="button" class="block" data-block="meta-send" aria-pressed="false">
+          <div class="ico meta"><svg><use href="#i-send"/></svg></div>
+          <h3>Meta Messaging API</h3>
+          <p>Sends the reply back to Instagram</p>
+          <span class="pill"><span class="dot"></span>2 files</span>
+        </button>
+        <button type="button" class="block" data-block="customer-receives" aria-pressed="false">
+          <div class="ico soft-pk"><svg><use href="#i-person"/></svg></div>
+          <h3>Customer receives quote</h3>
+          <p>A price, or the next question, in seconds</p>
+          <span class="pill none"><span class="dot"></span>not your code</span>
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- GROUPS -->
+  <section class="legend">
+    <div class="legend-head">
+      <h2>The 11 groups</h2>
+      <p>Click one to light up every block its files touch.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <footer>
+    <span>Every file, size and connection on this page was read from the live repository &mdash; not a mockup.</span>
+    <span>50 files &middot; 6 folders &middot; 14 commits</span>
+  </footer>
+</div>
+
+<div class="drawer" id="drawer" hidden aria-live="polite">
+  <div class="drawer-head">
+    <div>
+      <div class="kicker" id="dKicker"></div>
+      <h2 id="dTitle"></h2>
+      <p id="dWhat"></p>
+    </div>
+    <button type="button" class="drawer-close" id="dClose" aria-label="Close panel">&times;</button>
+  </div>
+  <div class="drawer-body">
+    <p class="note" id="dNote"></p>
+    <div class="files" id="dFiles"></div>
+    <p class="where" id="dWhere"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var GROUPS = {
+    1:{name:"Front door & wiring", session:"Session 1 · done"},
+    2:{name:"Instagram in / out", session:"Session 2"},
+    3:{name:"Conversation runtime & memory", session:"Session 3"},
+    4:{name:"AI layer & answering questions", session:"Session 4"},
+    5:{name:"Turn-by-turn state machine", session:"Session 5"},
+    6:{name:"The rulebook’s brain", session:"Session 6"},
+    7:{name:"Quote engine", session:"Session 7"},
+    8:{name:"Leads, email & handoff", session:"Session 8"},
+    9:{name:"Response layer", session:"Session 9"},
+    10:{name:"Tests & safety net", session:"Session 10"},
+    11:{name:"Docs & project config", session:"No session needed"}
+  };
+
+  var F = {
+    "main.py":{s:"11.7 KB",g:1,r:"The FastAPI entry point. Every webhook and health check lands here first."},
+    "v3_runtime_factory.py":{s:"3.4 KB",g:1,r:"Builds every other piece exactly once and wires them together."},
+
+    "meta_webhook_parser_v3.py":{s:"3.9 KB",g:2,r:"Pulls the customer’s text and ID out of Instagram’s raw webhook JSON."},
+    "instagram_channel_adapter_v3.py":{s:"6.5 KB",g:2,r:"Runs one message end to end: parse it, run it, send the reply."},
+    "instagram_sender_v3.py":{s:"3.4 KB",g:2,r:"Sends the finished reply through Meta’s Send API."},
+    "instagram_service.py":{s:"2.0 KB",g:2,r:"The original low-level Instagram call that the sender wraps."},
+
+    "local_conversation_runtime_v3.py":{s:"14.0 KB",g:3,r:"The conductor: orchestrator first, then renderer, then translator at the very edge."},
+    "session_repository_v3.py":{s:"1.6 KB",g:3,r:"Remembers what stage each chat is at. In memory today."},
+    "conversation_models.py":{s:"5.2 KB",g:3,r:"The shared data shapes almost every file imports, including the order of the quote fields."},
+    "turn_logger.py":{s:"4.9 KB",g:3,r:"Writes a structured log of exactly what happened on each turn."},
+
+    "gemini_semantic_adapter.py":{s:"28.7 KB",g:4,r:"The only file in the project that actually calls Gemini."},
+    "semantic_contract.py":{s:"8.5 KB",g:4,r:"The fixed list of what a message is allowed to mean at each stage."},
+    "message_translator_v3.py":{s:"4.5 KB",g:4,r:"Rewrites the finished reply into the customer’s language, right at the end."},
+    "business_answer_service_v3.py":{s:"9.3 KB",g:4,r:"Answers open questions by putting the live pricing sheet into Gemini’s prompt."},
+    "business_knowledge_adapter_v3.py":{s:"6.4 KB",g:4,r:"Turns raw spreadsheet rows into a clean catalogue of services and packages."},
+    "business_knowledge_service.py":{s:"5.0 KB",g:4,r:"Reads pricing and FAQ rows from the sheet and caches them for five minutes."},
+    "business_question_coordinator_v3.py":{s:"9.3 KB",g:4,r:"Tries plain arithmetic on package comparisons first, and only then asks Gemini."},
+
+    "conversation_events.py":{s:"1.5 KB",g:5,r:"A short fixed list of things that can happen in a chat."},
+    "conversation_state_machine.py":{s:"28.0 KB",g:5,r:"Decides the next stage, and walks the field order to find what is still missing."},
+    "event_normalizer.py":{s:"14.8 KB",g:5,r:"Rejects anything that is not actually allowed at this point in the chat."},
+    "response_plan.py":{s:"2.1 KB",g:5,r:"The fixed menu of 33 outcomes a turn can end in."},
+
+    "conversation_orchestrator.py":{s:"50.2 KB",g:6,r:"The brain. Every message passes through here and it decides what happens next."},
+
+    "quote_adapter_v3.py":{s:"4.6 KB",g:7,r:"Works out the real price in plain arithmetic: base, extra hours, travel."},
+    "quote_service.py":{s:"5.0 KB",g:7,r:"The original pricing formula that the adapter wraps."},
+    "quote_completion_service_v3.py":{s:"3.4 KB",g:7,r:"Runs everything that happens the moment a quote is finished."},
+
+    "lead_persistence_adapter_v3.py":{s:"9.2 KB",g:8,r:"Saves every lead, quoted or not, into the Leads sheet."},
+    "sheets_service.py":{s:"17.0 KB",g:8,r:"Talks to Google Sheets directly. The lowest-level file in the project."},
+    "email_delivery_adapter_v3.py":{s:"12.0 KB",g:8,r:"Sends the quote email and the new-lead alert, checking the body first."},
+    "email_service.py":{s:"13.1 KB",g:8,r:"The original low-level Gmail sender that the adapter wraps."},
+    "handoff_callback_service_v3.py":{s:"8.4 KB",g:8,r:"Handles “can I talk to a real person”, checking real UK office hours first."},
+
+    "customer_response_renderer_v3.py":{s:"28.4 KB",g:9,r:"Turns the decision into the actual English words and buttons a customer sees."},
+
+    "test_change_and_status_v3.py":{s:"6.6 KB",g:10,r:"Changing quote details, and asking for status, mid-chat."},
+    "test_change_request_v3.py":{s:"10.1 KB",g:10,r:"The “actually, change that” flow once a quote is under way."},
+    "test_contract_coverage_v3.py":{s:"10.0 KB",g:10,r:"Checks every legal stage-and-action pair in the contract is covered."},
+    "test_finish_anywhere_v3.py":{s:"5.0 KB",g:10,r:"A quote can still be finished from different points in the chat."},
+    "test_full_turn_matrix_v3.py":{s:"5.8 KB",g:10,r:"A large matrix of stage and message combinations, run end to end."},
+    "test_idle_entry_v3.py":{s:"4.8 KB",g:10,r:"How a chat starts fresh, or picks up again after going quiet."},
+    "test_production_defect_hotfix_v3.py":{s:"4.7 KB",g:10,r:"Locks in a real bug fix so it cannot quietly come back."},
+    "test_production_screenshot_regression_v3.py":{s:"8.1 KB",g:10,r:"Built from a real production problem you caught in a screenshot."},
+    "test_service_correction_v3.py":{s:"7.3 KB",g:10,r:"Correcting the chosen service or package part-way through."},
+    "v3_test_harness.py":{s:"3.8 KB",g:10,r:"The shared setup the other test files build on."},
+    "run_regressions.py":{s:"1.0 KB",g:10,r:"Runs the whole suite in one command."},
+
+    "README.md":{s:"7.0 KB",g:11,r:"Project overview: the core design rule and a map of the request path."},
+    "ARCHITECTURE.md":{s:"15.9 KB",g:11,r:"The deep dive: every runtime file and how they connect."},
+    "how-it-works.html":{s:"31.4 KB",g:11,r:"A standalone explainer page, “How a DM Becomes a Quote”."},
+    "requirements.txt":{s:"2.7 KB",g:11,r:"The Python packages the project needs."},
+    "Procfile":{s:"49 B",g:11,r:"One line telling the host how to start the app."},
+    ".gitignore":{s:"49 B",g:11,r:"Tells git what never to track: secrets, the virtual environment, caches."},
+    ".gcloudignore":{s:"84 B",g:11,r:"Tells the Cloud Run deploy what not to upload."},
+    ".env":{s:"423 B",g:11,r:"The real local secrets. Never committed, never opened."}
+  };
+
+  // Per-file detail. Concepts were read out of the real code with an AST pass,
+  // not guessed from the filename.
+  var D = {
+    "main.py":{L:481,d:"The only file that talks to the outside web. It declares seven addresses: a health check, three legal pages Meta requires, the webhook handshake, the Instagram login callback, and the one that actually receives DMs. It builds the rest of the app lazily, on the first message, so a broken downstream service cannot take the health check down with it.",c:[["Decorators (@app.get / @app.post)","turn an ordinary function into a web address FastAPI will call"],["async def","the two Meta-facing endpoints are async, so the server can handle other requests while waiting"],["Lazy global (get_v3_channel)","builds the app’s parts on first use and reuses them, instead of at import time"],["try / except with a safe return","the webhook always answers 200, so Meta does not retry the same message forever"],["os.environ + python-dotenv","VERIFY_TOKEN and the rest come from the environment, never from the code"],["pathlib.Path","file paths built safely instead of glued-together strings"]]},
+    "v3_runtime_factory.py":{L:113,d:"One function, build_instagram_channel_v3(), that creates all seventeen pieces of the system in the right order and passes each one into the next. No other file decides what its own dependencies are — they get handed in here.",c:[["Dependency injection","every class receives what it needs as an argument instead of building it itself"],["Composition root","the single place that knows how the whole system is assembled"],["Factory function","one call returns a fully wired object, ready to use"],["Import order as dependency order","the file reads top to bottom as the build order"]]},
+
+    "meta_webhook_parser_v3.py":{L:156,d:"Meta sends a deeply nested lump of JSON. This file digs out the two things you actually need — who sent it and what they said — and returns them as one small fixed object. If the shape is not what it expects, it says so here rather than crashing three files later.",c:[["class IncomingMessageType(str, Enum)","a fixed set of message kinds; being a str as well means it compares and prints like plain text"],["@dataclass(frozen=True)","the parsed message cannot be changed after it is created"],["Defensive .get() chaining","reads optional keys without blowing up on the missing ones"],["Type hints on the return","the next file knows exactly what it is receiving"]]},
+    "instagram_channel_adapter_v3.py":{L:240,d:"The one file in the conversation path that knows this came from Instagram. It runs a single message end to end — parse, load the session, run the turn, send the reply, save the session — wrapped in a safety net so a failure becomes a polite fallback message rather than silence.",c:[["@dataclass WebhookProcessingResult","bundles the outcome of one webhook into a single return value"],["try / except with fallback","a crash mid-turn still sends the customer something"],["Composition over inheritance","it holds a parser, a runtime, a sender and a repository rather than inheriting from them"],["Separation of concerns","Instagram-specific code stops here; nothing deeper knows the channel"]]},
+    "instagram_sender_v3.py":{L:149,d:"Defines what “a thing that can send a message” means, then gives one implementation that forwards to the older instagram_service.py. Adding WhatsApp later means writing a new class with the same shape — nothing else changes.",c:[["typing.Protocol","structural typing: any class with a matching send_rendered() counts, with no inheritance"],["Adapter pattern","wraps old working code behind a new interface instead of rewriting it"],["Lazy import (_service)","the legacy module is only loaded when a message is actually sent"],["List comprehension","buttons are converted to Meta’s format in one line"]]},
+    "instagram_service.py":{L:98,d:"The original, pre-v3 function that makes the actual HTTP call to Meta’s Send API. Small, and still doing real work — the newer sender wraps it rather than replacing it.",c:[["httpx","the HTTP client that makes the POST to Meta"],["os.getenv + dotenv","the access token and business ID come from the environment"],["Module-level constants","the Meta API version is pinned in one place"],["raise on a bad response","a failed send becomes an exception the caller can handle"]]},
+
+    "local_conversation_runtime_v3.py":{L:524,d:"The conductor. For every message it calls the orchestrator to decide, the renderer to write the words, and the translator right at the end if the customer is not writing in English. It has no idea Instagram exists, which is exactly why a second channel would be cheap.",c:[["@dataclass RuntimeTurnResult","one object carries the finished messages plus what happened"],["Constructor injection with defaults","each collaborator is passed in, or built if not supplied"],["Private helpers (_complete, _translate_messages)","the two public methods stay short and readable"],["try / except around translation","if translation fails, the English reply still goes out"]]},
+    "session_repository_v3.py":{L:87,d:"Defines what “somewhere to keep conversations” means — get, save, delete — and gives one implementation backed by a plain dictionary. Because everything else only knows the Protocol, swapping in Firestore later means adding a class, not editing the conversation logic.",c:[["typing.Protocol","the interface Firestore would implement later, with no base class to inherit"],["copy (defensive copying)","callers get a copy, so they cannot mutate stored state by accident"],["dict as the store","the entire store is one dictionary in memory — fast, and gone on restart"],["Repository pattern","storage details stay behind get / save / delete"]]},
+    "conversation_models.py":{L:195,d:"The shared vocabulary. It defines FlowState — every stage a chat can be in — plus the objects that travel between files: the quote being built, the customer’s details, the whole conversation context. It also holds the order the quote questions are asked in, which is what the state machine walks to find the next gap.",c:[["class FlowState(str, Enum)","stages are a fixed set, not loose strings that can be typo’d"],["@dataclass × 5","five plain data holders with type hints and no boilerplate __init__"],["field(default_factory=...)","each context gets its own list and dict instead of sharing one"],["Module-level lookup tables","QUOTE_FIELD_ORDER and its two maps are the single source of truth"],["Dict comprehension","FIELD_TO_QUOTE_STATE is built by inverting the other map, so the two cannot drift apart"]]},
+    "turn_logger.py":{L:198,d:"Turns everything that happened on one turn — what the customer said, what the AI thought, what the state machine decided, what got sent — into one structured line. This is the file that made 40 hours of debugging possible.",c:[["dataclasses.asdict","converts the dataclasses into plain dicts, ready for JSON"],["json.dumps","one machine-readable line per turn instead of scattered prints"],["datetime with UTC","every entry timestamped the same way wherever the server runs"],["Pure functions (build / format / emit)","building the log is separate from printing it, so a test can check it"]]},
+
+    "gemini_semantic_adapter.py":{L:976,d:"The only file that calls Gemini. It builds a prompt containing the current stage and the actions that are legal in that stage, sends it, then parses the reply strictly — if the JSON is malformed or the action is not allowed, it raises rather than passing nonsense downstream.",c:[["@dataclass(frozen=True) SemanticRequest","the request is an immutable value object"],["Custom exception (GeminiSemanticAdapterError(RuntimeError))","AI failures are one catchable type"],["json parsing with validation","the model’s text is never trusted as it stands"],["Prompt built from data","allowed actions are pulled from semantic_contract.py, not hard-coded"],["Generator expressions","the allowed-action list is assembled in one pass"]]},
+    "semantic_contract.py":{L:312,d:"The guardrail around the AI. It lists every action a message is allowed to mean, and for each stage of the conversation, which of those actions are legal there. One function, is_action_allowed(), is the gate everything passes through.",c:[["class SemanticAction(str, Enum)","the AI can only come back with one of a fixed set of actions"],["@dataclass(frozen=True) SemanticInterpretation","an interpretation cannot be edited after it is made"],["Constant lookup tables (STATE_ALLOWED_ACTIONS)","the rules are data, which is why a test can check every combination"],["Set membership","allowed-action checks are instant, not a loop"]]},
+    "message_translator_v3.py":{L:158,d:"Takes the finished English messages and rewrites them in the customer’s language in one batched call, with instructions not to touch prices, dates or package names. If anything goes wrong, the English goes out unchanged.",c:[["Batching (translate_batch)","all fragments in one API call instead of one call each"],["try / except with graceful degradation","a translation failure never blocks the reply"],["Length validation on the response","if the model returns the wrong number of items, it is rejected"],["zip()","pairs each translated string back to its original"]]},
+    "business_answer_service_v3.py":{L:372,d:"Handles the open questions a rigid flow cannot: “do you do drone shots?”, “what’s included?”. It loads the live pricing and FAQ rows, puts them in the prompt, and asks Gemini to answer only from those facts.",c:[["@dataclass(frozen=True) BusinessAnswer","the answer and where it came from, as one value"],["Grounding the prompt in real data","sheet rows go into the prompt, so answers stay factual"],["Deterministic shortcut first","_try_deterministic_package_answer avoids an AI call when arithmetic will do"],["f-strings","the prompt is assembled from live values"]]},
+    "business_knowledge_adapter_v3.py":{L:279,d:"Sits between the spreadsheet and the rest of the app. Raw rows go in, a tidy catalogue comes out — pricing, packages, business info, FAQs — so no other file has to know what the sheet’s columns are called.",c:[["Custom exception (BusinessKnowledgeAdapterError)","sheet problems surface as one clear error type"],["Adapter pattern","raw rows in, clean objects out"],["Lazy service loading (_service)","the sheets module is imported on first use"],["pathlib + sys.path","makes the legacy module importable without moving it"]]},
+    "business_knowledge_service.py":{L:237,d:"Reads the pricing and FAQ rows from Google Sheets and keeps them in memory for five minutes, so a busy chat is not making a spreadsheet call on every message. It is thread-safe, because Cloud Run can run several requests at once.",c:[["threading.Lock with `with`","two requests refreshing the cache at once cannot corrupt it"],["Time-based cache (CACHE_TTL_SECONDS)","anything older than five minutes is refetched"],["copy","callers get a copy, so they cannot mutate the cache"],["Dict and list comprehensions","rows are filtered and reshaped in one pass"]]},
+    "business_question_coordinator_v3.py":{L:307,d:"Decides how to answer a “which package is better?” question. If the answer is arithmetic on the catalogue, it does the sums itself. Only when it is genuinely open does it pay for a Gemini call.",c:[["@dataclass BusinessQuestionResolution","carries both the answer and what should happen next"],["Strategy selection","cheap deterministic path first, AI second"],["Composition","holds the answer service, the quote adapter and the orchestrator"],["Private formatting helpers (_display_money)","money and numbers formatted in one place"]]},
+
+    "conversation_events.py":{L:64,d:"The shortest file in the project, and one of the most important. It names every kind of thing that can happen in a chat, and defines the small frozen object that carries one of those things plus its data.",c:[["class EventType(str, Enum)","the complete list of what can happen, in one place"],["@dataclass(frozen=True)","an event is a fact about the past, so it cannot be edited"],["field(default_factory=dict)","each event gets its own metadata dict"],["Event-driven design","the state machine reacts to events rather than to raw text"]]},
+    "conversation_state_machine.py":{L:969,d:"Given the stage the chat is in and the event that just happened, it returns the stage that comes next — and nothing else. It also walks the quote field order to find the next thing still missing, and can park a question to come back to when a customer answers out of order.",c:[["Finite state machine","stage plus event decides the next stage; no hidden state"],["Custom exception (InvalidTransitionError)","an illegal move fails loudly instead of quietly corrupting the chat"],["@dataclass TransitionResult","the new state and what changed, returned together"],["List indexing on QUOTE_FIELD_ORDER","the next missing field is found by walking a list, not by nested ifs"]]},
+    "event_normalizer.py":{L:487,d:"The checkpoint. A button tap and an AI interpretation both have to become the same kind of clean event before the state machine will touch them — and if what arrived is not legal at this point in the chat, this is where it gets rejected.",c:[["Custom exception (EventNormalizationError(ValueError))","subclassing ValueError says “bad input”, not “bug”"],["Constant lookup dicts (BUTTON_FIELD_VALUES)","button IDs map to events as data, not as an if-chain"],["Two entry points, one output type","from_button and from_semantic normalise two sources into one shape"],["Validation before mutation","nothing changes state until the event is proven legal"]]},
+    "response_plan.py":{L:76,d:"The fixed menu of things a turn is allowed to end in — ask the next question, give the quote, hand over to a human, and so on. The orchestrator returns one of these and the renderer turns it into words. Neither knows about the other.",c:[["class ResponseAction(str, Enum)","33 named outcomes instead of magic strings"],["@dataclass(frozen=True) ResponsePlan","the decision, once made, cannot be edited downstream"],["field(default_factory=...)","safe defaults for the optional parts"],["Decision separated from presentation","what to say is decided here; how to say it is decided elsewhere"]]},
+
+    "conversation_orchestrator.py":{L:1652,d:"The brain, and by a distance the biggest file — 1,652 lines. Every message goes through handle_text() or handle_button(). It asks the interpreter what the message meant, guards that answer against the real catalogue, normalises it into an event, asks the state machine what happens next, and returns one ResponsePlan. The size is mostly the special cases you found in production: changing an answer mid-flow, finishing early, phone numbers, email addresses, package switches.",c:[["typing.Protocol (SemanticInterpreter)","it depends on the shape of an interpreter, not on Gemini — which is why tests can swap in a fake"],["dataclasses.replace","state is updated by making a changed copy, not by mutating in place"],["re (regular expressions)","phone numbers and email addresses are recognised by pattern"],["Custom exception (ConversationOrchestratorError)","orchestration failures are one catchable type"],["Guard clauses and early returns","each special case is handled and returned, so nesting stays shallow"],["One private method per case","_try_finish_input, _route_field_intent and friends, instead of one giant branch"]]},
+
+    "quote_adapter_v3.py":{L:200,d:"Translates the conversation’s data into the shape the old pricing function expects, calls it, and hands back a clean result. It is the bridge between the new conversation model and the original quote maths.",c:[["Adapter pattern","new-style context in, legacy dict out, clean result back"],["copy","the session dict is copied, so the original context is untouched"],["Custom exception (QuoteAdapterError)","a pricing failure is distinguishable from any other"],["Lazy service loading (_service)","quote_service is imported on first use"]]},
+    "quote_service.py":{L:258,d:"The original pricing formula, still doing the real arithmetic: base price for the service, plus extra hours at the hourly rate, plus travel. Three functions, no classes, and no AI anywhere near it.",c:[["Pure functions","the same inputs always give the same price, which makes it trivial to test"],["Defensive type coercion (to_number)","“6”, 6 and “6 hours” all become a number safely"],["try / except around parsing","a bad spreadsheet value does not crash the quote"],["No global state","everything it needs is passed in"]]},
+    "quote_completion_service_v3.py":{L:149,d:"The finishing sequence. The moment a quote is complete, this runs the four things that must all happen: work out the final price, save the lead, send the emails, and tell the conversation what to show next.",c:[["@dataclass QuoteCompletionResult","one object holds everything the turn produced"],["Orchestration of side effects","the order price → save → email is explicit and in one place"],["Dependency injection","the adapters it calls are passed in, so a test can capture them"],["A single public method","complete() is the only entry point, which makes it easy to reason about"]]},
+
+    "lead_persistence_adapter_v3.py":{L:372,d:"Writes leads to the Leads tab — whether the customer got a quote or dropped out halfway. It builds the row from the conversation context, and can come back later to update that row’s status.",c:[["@dataclass(frozen=True) LeadPersistenceResult","the outcome of a save, as an unchangeable value"],["Custom exception (LeadPersistenceAdapterError)","a failed write is a distinct, catchable event"],["Adapter pattern","domain object in, spreadsheet row out"],["try / except around I/O","the network call to Sheets is the risky part, so it is wrapped"]]},
+    "sheets_service.py":{L:880,d:"The lowest-level file in the project — the only one that speaks Google Sheets. It opens the spreadsheet, reads rows, appends leads and updates cells. It imports nothing else from the project, which is why it can be reasoned about on its own.",c:[["Lazy proxy classes (_LazySpreadsheet, _LazyWorksheet)","the connection only opens the first time a sheet is actually touched"],["Leading-underscore naming","marks these as internal, not part of the public API"],["Header-driven rows (build_row_from_headers)","columns are matched by name, so reordering the sheet does not break it"],["try / except on every API call","network failures are handled rather than assumed away"],["Comprehensions","rows are filtered and reshaped without loops"]]},
+    "email_delivery_adapter_v3.py":{L:479,d:"Builds and sends the two emails: the quote confirmation to the customer and the new-lead alert to the team. Before anything goes out it checks the body for internal text that should never reach a customer.",c:[["Custom exception (EmailDeliveryAdapterError)","an email failure does not look like a pricing failure"],["Content validation before send","a guard that runs before an irreversible action"],["Private builders (_build_customer_body, _fmt_money)","formatting kept well away from sending"],["Adapter pattern","wraps the legacy email_service rather than replacing it"]]},
+    "email_service.py":{L:555,d:"The original Gmail integration. It handles the OAuth token, builds a MIME message, base64-encodes it the way Gmail’s API wants, and sends. The newer adapter wraps this rather than rewriting it.",c:[["OAuth 2.0 token flow","a stored token is refreshed, rather than a password being kept anywhere"],["email.mime + base64","Gmail’s API needs the message encoded in a specific way"],["Module-level path constants","credential locations defined once and read from the environment"],["try / except around the send","a failed send is reported, not silently swallowed"]]},
+    "handoff_callback_service_v3.py":{L:326,d:"Handles “can I speak to someone?”. It checks the actual UK time against real office hours before deciding what to promise, takes the customer’s phone number, logs the lead and alerts the team.",c:[["zoneinfo.ZoneInfo","real Europe/London time, so British Summer Time is handled properly"],["datetime comparisons","office hours checked against a real clock, not the server’s guess"],["Three frozen dataclasses","each step of the handoff returns its own immutable result"],["Timezone-aware UTC timestamps","logs stay consistent wherever the server runs"]]},
+
+    "customer_response_renderer_v3.py":{L:1027,d:"Takes a ResponsePlan and produces the actual words and buttons. 1,027 lines, because each of the 33 outcomes needs wording that sounds like a person plus the button set that goes with it. It is the only file that decides how things sound.",c:[["Two frozen dataclasses (ButtonSpec, RenderedMessage)","a rendered message is a value, not something later code edits"],["field(default_factory=list)","each message gets its own button list"],["Dispatch on an Enum","the plan’s action selects the wording, instead of a long if/elif chain"],["Comprehensions and generator expressions","button sets are built declaratively"],["Presentation kept separate","changing the wording touches this file and nothing else"]]},
+
+    "test_change_and_status_v3.py":{L:170,d:"Checks the two things customers do most once a quote is under way: change an answer, and ask where things stand.",c:[["Test doubles with @staticmethod","lightweight fakes for the knowledge source and the interpreter"],["Behaviour-focused assertions","it checks what the customer would see, not internal variables"]]},
+    "test_change_request_v3.py":{L:264,d:"Covers the “actually, change that” flow once a quote already exists — that the right field changes, the price is recalculated, and nothing else quietly moves.",c:[["Fixture function (quoted_context)","one helper builds the starting state for every case"],["Arrange, act, assert","each test sets up, does one thing, and checks one thing"]]},
+    "test_contract_coverage_v3.py":{L:306,d:"The cleverest test in the suite. Instead of checking a handful of cases, it reads the contract itself and asserts that every state-and-action pair is actually handled — so adding a new action without handling it makes this test fail.",c:[["inspect (reading code at runtime)","the test inspects the real definitions rather than a copy of them"],["Data-driven testing","cases are generated from STATE_ALLOWED_ACTIONS, not typed out by hand"],["Generator expressions with all() / any()","coverage is checked in one pass"],["re","response wording is checked by pattern"]]},
+    "test_finish_anywhere_v3.py":{L:159,d:"Proves a customer can finish from any point in the chat — and, just as important, lists the states where finishing must not end the conversation.",c:[["Positive and negative sets","ENDS_THE_CHAT and MUST_NOT_END state both what should and should not happen"],["Looping over STATES","every stage is checked, not a sample of them"]]},
+    "test_full_turn_matrix_v3.py":{L:166,d:"Runs a grid: every conversation stage crossed with every kind of message, checking each combination ends somewhere sensible. This is the test that catches “it works, but only if you answer in the expected order”.",c:[["Matrix / combinatorial testing","states × messages generated in a loop, not written out by hand"],["Module-level fixtures (STATES, RESPONSES)","the inputs are data at the top of the file"],["Failure messages that name the case","a red test tells you which combination broke"]]},
+    "test_idle_entry_v3.py":{L:124,d:"Covers the very start of a chat, and what happens when someone comes back after going quiet — the case that is easy to forget and very visible when it breaks.",c:[["Entry-point testing","the first message is treated as its own case"],["Shared harness","reuses v3_test_harness so the setup is not repeated"]]},
+    "test_production_defect_hotfix_v3.py":{L:169,d:"Born from a live defect. ExplodingClient deliberately throws when it is called, proving the system degrades gracefully instead of taking the whole conversation down with it.",c:[["Fault injection (ExplodingClient)","deliberately fails, to check the error path is real and not theoretical"],["types.SimpleNamespace","a quick stand-in object without defining a class"],["One-shot stub (OneShotInterpreter)","answers once, then the test asserts on what followed"]]},
+    "test_production_screenshot_regression_v3.py":{L:228,d:"Built from a real problem you caught in a production screenshot. NeverCallClient is the interesting part — it raises if Gemini is called at all, which is how the test proves the answer came from arithmetic and not from the model.",c:[["Exploding spy (NeverCallClient)","fails the test if the code takes the expensive path"],["Queue-based stub (QueueInterpreter)","returns scripted answers in order, simulating a multi-turn chat"],["Regression test","locks in a fix so it cannot silently come back"],["@staticmethod on the fakes","they need no instance state"]]},
+    "test_service_correction_v3.py":{L:230,d:"The widest test in the suite: it fakes the entire outside world — parser, sender, repository, runtime — and pushes a correction (“actually, make it videography”) through the full path to check the change lands everywhere it should.",c:[["Recording double (RecordingSender)","captures what was sent so the test can assert on it"],["In-memory repository (MemoryRepo)","swapped in through the Protocol, no real storage needed"],["End-to-end test with fakes","the real path, without the network"],["Seven test doubles in one file","possible only because nothing builds its own dependencies"]]},
+    "v3_test_harness.py":{L:115,d:"The shared scaffolding every other test uses. It provides a fake knowledge source and a ScriptedAdapter that returns pre-written interpretations instead of calling Gemini — so the tests are fast, free and identical on every run.",c:[["Test double / stub (FakeKnowledge)","stands in for the real spreadsheet"],["Subclassing (ScriptedAdapter(GeminiSemanticAdapter))","inherits the real parsing, replaces only the network call"],["@classmethod","an alternative constructor for building a configured orchestrator"],["Dependency injection makes it possible","because nothing builds its own dependencies, they can all be replaced"]]},
+    "run_regressions.py":{L:47,d:"One command that runs all nine test files in turn and reports which passed. This is what you run before a deploy.",c:[["subprocess","runs each test file as its own process, so one crash does not stop the rest"],["Module-level SUITES list","adding a test file means adding one line"],["sys.exit with a status code","returns non-zero on failure, so CI could pick it up later"]]},
+
+    "README.md":{L:0,d:"The first thing anyone opens. It states the design rule the whole project turns on — Gemini understands language, Python decides, Sheets holds the data — then shows the path a request takes and links to the deeper document.",c:[["Design rule stated up front","a reader knows your reasoning inside the first paragraph"],["Request path shown in text","the flow renders anywhere, with no image needed"],["Links out to ARCHITECTURE.md","short front page, depth one click away"]]},
+    "ARCHITECTURE.md":{L:0,d:"The deep dive: every runtime file, what it does and how the pieces connect — including the honest note that session memory lives in RAM and Firestore is the planned fix.",c:[["Documented trade-offs","naming a weakness yourself reads as judgement, not as a gap"],["File-by-file reference","a new developer can find their way without you in the room"],["Written during the build","documentation as part of the work, not an afterthought"]]},
+    "how-it-works.html":{L:0,d:"A standalone page titled “How a DM Becomes a Quote” — the non-technical explanation, written for the client rather than for a developer.",c:[["Audience-specific documentation","the same system explained twice, for two different readers"],["Self-contained HTML","opens in any browser with no build step"]]},
+    "requirements.txt":{L:0,d:"The outside packages the project needs — FastAPI, the Google client libraries, httpx, python-dotenv and the rest — so the same versions install on Cloud Run as on your machine.",c:[["Dependency pinning","the deploy installs what you actually tested against"],["Reproducible environments","one file recreates the whole setup"]]},
+    "Procfile":{L:1,d:"One line: web: uvicorn main:app --host 0.0.0.0 --port $PORT. It tells the host which server to run, which module to load, and to take the port from the environment.",c:[["ASGI server (uvicorn)","FastAPI is the app; uvicorn is what actually serves it"],["$PORT from the environment","the platform picks the port, not your code"],["Binding to 0.0.0.0","listens on all interfaces, which a container needs"]]},
+    ".gitignore":{L:0,d:"Four lines that keep secrets and junk out of git: the virtual environment, compiled caches, the credentials folder and .env. Worth re-checking before the repo goes public.",c:[["Secret hygiene","credentials never enter the git history, where they are painful to remove"],["Ignoring build artefacts","the repo holds source, not generated files"]]},
+    ".gcloudignore":{L:0,d:"The deploy-time equivalent: what not to upload to Cloud Run. Keeps the build small and fast.",c:[["Smaller deploy uploads","the virtual environment and caches never leave your machine"]]},
+    ".env":{L:0,d:"The real secrets for running locally: API keys, tokens, IDs. Loaded by python-dotenv at startup, ignored by git, and never opened in any of this work.",c:[["Environment variables for config","the same code runs locally and in production with different values"],["Secrets kept out of source","nothing sensitive sits in a file that gets committed"],["python-dotenv","loads the file into the environment when the app starts"]]}
+  };
+
+  var B = {
+    "customer":{
+      t:"Customer", k:"Outside your system",
+      w:"A real person messaging the business on Instagram, usually asking for a price.",
+      f:[],
+      note:"Nothing of yours runs here. Everything in this picture happens in the few seconds between them pressing send and a reply appearing."
+    },
+    "ig-account":{
+      t:"Instagram Business Account", k:"Meta’s side",
+      w:"The DM lands in the business inbox on Instagram.",
+      f:[],
+      note:"Meta owns the conversation. Your app never talks to the customer directly — it talks to Meta, and Meta delivers the message."
+    },
+    "webhooks":{
+      t:"Meta / Instagram Webhooks", k:"The way in",
+      w:"Meta pushes each new DM to your app as its own request.",
+      f:["main.py"],
+      note:"The one-time handshake that registers this webhook — the hub.mode / hub.challenge check — is a GET handler in main.py. After that, every single DM arrives as its own POST to the same address. There is no polling and no waiting."
+    },
+    "cloudrun":{
+      t:"Google Cloud Run", k:"Your infrastructure",
+      w:"The machine the app runs on: production, europe-west2.",
+      f:["Procfile","requirements.txt",".gcloudignore",".env"],
+      note:"These four are deployment instructions, not application logic. Procfile is the single line that starts the app. Cloud Run scales down to zero when nobody is messaging — cheap, but it is also exactly why session memory is the roadmap item it is."
+    },
+    "fastapi":{
+      t:"Python / FastAPI Backend", k:"The app itself",
+      w:"Your code, and the wiring that builds every piece of it once at startup.",
+      f:["main.py","v3_runtime_factory.py"],
+      note:"v3_runtime_factory.py builds all six steps below in a single pass, in dependency order, and hands the finished object to main.py. Swap a data source or add a second channel, and this is the one file that changes."
+    },
+    "webhook-receiver":{
+      t:"Webhook Receiver", k:"Step 1",
+      w:"Validates and parses the incoming message.",
+      f:["main.py","meta_webhook_parser_v3.py","instagram_channel_adapter_v3.py"],
+      note:"main.py always answers Meta with a 200, even when something inside fails — otherwise Meta retries the same message over and over. Keeping the parser separate from the adapter means the messy shape of Meta’s JSON stays in one small file."
+    },
+    "conversation-manager":{
+      t:"Conversation Manager", k:"Step 2",
+      w:"Keeps track of where this particular chat has got to.",
+      f:["local_conversation_runtime_v3.py","session_repository_v3.py","conversation_models.py","turn_logger.py"],
+      note:"The runtime is the conductor: orchestrator first, then the renderer, then the translator at the very edge. It does not know Instagram exists — only the channel adapter does — which is what would make a second channel cheap to add."
+    },
+    "gemini":{
+      t:"Gemini Structured Extraction", k:"Step 3",
+      w:"Pulls the real details out of plain English.",
+      f:["gemini_semantic_adapter.py","semantic_contract.py","business_answer_service_v3.py","business_question_coordinator_v3.py"],
+      note:"gemini_semantic_adapter.py is the only file in the project that calls Gemini. Whatever comes back is checked against semantic_contract.py before anything downstream trusts it, so a strange answer gets caught rather than acted on."
+    },
+    "requirement-checker":{
+      t:"Requirement Checker", k:"Step 4",
+      w:"Works out what is still missing before a price is possible.",
+      f:["conversation_state_machine.py","event_normalizer.py","conversation_events.py","response_plan.py","conversation_models.py"],
+      note:"The order of the quote fields lives in conversation_models.py, and conversation_state_machine.py walks that order to find the next gap. event_normalizer.py throws out anything that is not legal at this point in the chat, whether it came from a button or from the AI."
+    },
+    "quote-engine":{
+      t:"Deterministic Quote Engine", k:"Step 5",
+      w:"Calculates the price using business rules, not the AI.",
+      f:["quote_adapter_v3.py","quote_service.py","quote_completion_service_v3.py"],
+      note:"No language model touches the number. Base price, plus extra hours, plus travel, in plain Python — which is why the same enquiry always produces the same quote. This is the single easiest thing to defend in an interview."
+    },
+    "response-builder":{
+      t:"Response Builder", k:"Step 6",
+      w:"Writes the friendly reply, in the customer’s language.",
+      f:["customer_response_renderer_v3.py","message_translator_v3.py"],
+      note:"The renderer writes the English and the buttons. The translator rewrites it into the customer’s language at the very last moment, and quietly falls back to English if anything goes wrong."
+    },
+    "orchestrator":{
+      t:"conversation_orchestrator.py", k:"The brain",
+      w:"Sits behind all six steps and decides what happens on every single turn.",
+      f:["conversation_orchestrator.py"],
+      note:"The biggest file in the project at 50 KB. It reads what Gemini understood, asks the state machine what comes next, and returns one of the 33 fixed plans. Nothing reaches the customer without passing through here."
+    },
+    "sheets":{
+      t:"Google Sheets", k:"Data source",
+      w:"Pricing and catalogue read from it, every lead written to it.",
+      f:["sheets_service.py","business_knowledge_service.py","business_knowledge_adapter_v3.py","business_answer_service_v3.py","lead_persistence_adapter_v3.py"],
+      note:"Doing two jobs at once: the source of truth the app reads, and the ledger it writes to. Reads are cached for five minutes, so a live chat is never waiting on a spreadsheet call for every message."
+    },
+    "session-memory":{
+      t:"Session Memory", k:"Known weak spot",
+      w:"Where a half-finished conversation is held between messages.",
+      f:["session_repository_v3.py"],
+      note:"The one honest gap, and worth naming before anyone else does. Conversation state lives in the app’s own memory, so a redeploy or a scale-to-zero loses any chat that is mid-quote. The file says so itself and names Firestore as the fix."
+    },
+    "lead-handoff":{
+      t:"Lead Logging & Human Handoff", k:"Follow-up",
+      w:"Nothing a customer asked about gets lost.",
+      f:["lead_persistence_adapter_v3.py","handoff_callback_service_v3.py"],
+      note:"Every enquiry is saved whether it turned into a quote or not. The handoff service checks real UK office hours before it promises anyone a callback, rather than saying “someone will be in touch” at 11pm."
+    },
+    "gmail":{
+      t:"Gmail — Email Notifications", k:"Follow-up",
+      w:"Two emails go out on a finished quote.",
+      f:["email_delivery_adapter_v3.py","email_service.py"],
+      note:"The quote confirmation to the customer, and a new-lead alert to the team. The body is checked for leaked internal text before anything is allowed to send — a small safety net that is easy to point at."
+    },
+    "business-team":{
+      t:"Business Team / Admin", k:"People, not code",
+      w:"Review leads, handle the complex requests, follow up.",
+      f:[],
+      note:"The humans on the other end. They see the leads in the sheet and the alert emails — the bot’s job is to make sure they only get involved when they need to be."
+    },
+    "meta-send":{
+      t:"Meta Messaging API", k:"The way out",
+      w:"The last stop before a message leaves your system.",
+      f:["instagram_sender_v3.py","instagram_service.py"],
+      note:"instagram_sender_v3.py wraps the older instagram_service.py instead of replacing it — the same pattern used for Gmail and for pricing. Old working code kept alive under a new interface."
+    },
+    "customer-receives":{
+      t:"Customer receives quote", k:"Outside your system",
+      w:"A price, or the next question, in seconds.",
+      f:[],
+      note:"From their side it was one message and one reply. Everything else in this picture happened in between."
+    }
+  };
+
+  // fill group file lists from F
+  var GFILES = {};
+  Object.keys(F).forEach(function(name){
+    var g = F[name].g;
+    (GFILES[g] = GFILES[g] || []).push(name);
+  });
+
+  var lanes = document.getElementById("lanes");
+  var drawer = document.getElementById("drawer");
+  var dKicker = document.getElementById("dKicker");
+  var dTitle = document.getElementById("dTitle");
+  var dWhat = document.getElementById("dWhat");
+  var dNote = document.getElementById("dNote");
+  var dFiles = document.getElementById("dFiles");
+  var dWhere = document.getElementById("dWhere");
+  var chipWrap = document.getElementById("chips");
+
+  var blockEls = Array.prototype.slice.call(lanes.querySelectorAll("[data-block]"));
+
+  // ---- build the group chips ----
+  Object.keys(GROUPS).forEach(function(n){
+    var g = GROUPS[n];
+    var count = (GFILES[n] || []).length;
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.setAttribute("data-group", n);
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML =
+      '<span class="chip-num">' + n + '</span>' +
+      '<span class="chip-body"><b></b><span></span></span>';
+    b.querySelector("b").textContent = g.name;
+    b.querySelector(".chip-body span").textContent = count + (count === 1 ? " file · " : " files · ") + g.session;
+    chipWrap.appendChild(b);
+  });
+  var chipEls = Array.prototype.slice.call(chipWrap.querySelectorAll("[data-group]"));
+
+  // ---- rendering ----
+  function section(heading, build){
+    var s = document.createElement("div");
+    s.className = "sec";
+    var h = document.createElement("div");
+    h.className = "sec-h";
+    h.textContent = heading;
+    s.appendChild(h);
+    s.appendChild(build());
+    return s;
+  }
+
+  function fileCard(name){
+    var f = F[name];
+    var d = D[name] || {};
+    var isPy = /\.py$/.test(name);
+
+    var el = document.createElement("div");
+    el.className = "file";
+
+    // --- collapsed head: always visible ---
+    var head = document.createElement("button");
+    head.type = "button";
+    head.className = "file-head";
+    head.setAttribute("aria-expanded", "false");
+
+    var top = document.createElement("div");
+    top.className = "file-top";
+    var tag = document.createElement("span");
+    tag.className = "gtag";
+    tag.textContent = "G" + f.g;
+    var nm = document.createElement("span");
+    nm.className = "file-name";
+    nm.textContent = name;
+    var sz = document.createElement("span");
+    sz.className = "file-size";
+    sz.textContent = (d.L ? d.L.toLocaleString() + " lines · " : "") + f.s;
+    var chev = document.createElement("span");
+    chev.className = "chev";
+    chev.textContent = "▶";
+    chev.setAttribute("aria-hidden", "true");
+    top.appendChild(tag); top.appendChild(nm); top.appendChild(sz); top.appendChild(chev);
+
+    var role = document.createElement("p");
+    role.className = "file-role";
+    role.textContent = f.r;
+    head.appendChild(top); head.appendChild(role);
+
+    // --- expanded body ---
+    var body = document.createElement("div");
+    body.className = "file-body";
+    body.hidden = true;
+
+    if (d.d){
+      body.appendChild(section("description:", function(){
+        var p = document.createElement("p");
+        p.textContent = d.d;
+        return p;
+      }));
+    }
+    if (d.c && d.c.length){
+      body.appendChild(section(isPy ? "imp_python_concepts:" : "key_concepts:", function(){
+        var ul = document.createElement("ul");
+        ul.className = "concepts";
+        d.c.forEach(function(pair){
+          var li = document.createElement("li");
+          var code = document.createElement("code");
+          code.textContent = pair[0];
+          var span = document.createElement("span");
+          span.textContent = " — " + pair[1];
+          li.appendChild(code); li.appendChild(span);
+          ul.appendChild(li);
+        });
+        return ul;
+      }));
+    }
+
+    head.addEventListener("click", function(){
+      var nowOpen = body.hidden;
+      body.hidden = !nowOpen;
+      head.setAttribute("aria-expanded", nowOpen ? "true" : "false");
+      el.classList.toggle("open", nowOpen);
+    });
+
+    el.appendChild(head); el.appendChild(body);
+    return el;
+  }
+
+  function paint(selEl, relEls){
+    lanes.classList.add("armed");
+    blockEls.forEach(function(el){
+      el.classList.remove("is-sel","is-rel");
+      el.setAttribute("aria-pressed","false");
+    });
+    if (selEl){ selEl.classList.add("is-sel"); selEl.setAttribute("aria-pressed","true"); }
+    relEls.forEach(function(el){ if (el !== selEl) el.classList.add("is-rel"); });
+  }
+
+  function openDrawer(){
+    drawer.hidden = false;
+    document.body.classList.add("drawer-open");
+  }
+
+  // keep the block you just clicked visible above the panel
+  function reveal(el){
+    if (!el || !el.getBoundingClientRect) return;
+    requestAnimationFrame(function(){
+      var drawerH = drawer.getBoundingClientRect().height || 0;
+      var r = el.getBoundingClientRect();
+      var safeBottom = window.innerHeight - drawerH - 18;
+      if (r.bottom <= safeBottom && r.top >= 10) return;
+      var smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var target = window.scrollY + r.top - Math.max(18, (safeBottom - r.height) / 2);
+      window.scrollTo({ top: Math.max(0, target), behavior: smooth ? "smooth" : "auto" });
+    });
+  }
+
+  function showBlock(id){
+    var data = B[id];
+    if (!data) return;
+    var selEl = lanes.querySelector('[data-block="' + id + '"]');
+
+    // related = other blocks sharing at least one file
+    var rel = [];
+    if (data.f.length){
+      blockEls.forEach(function(el){
+        var oid = el.getAttribute("data-block");
+        if (oid === id) return;
+        var other = B[oid];
+        if (!other) return;
+        var shares = other.f.some(function(n){ return data.f.indexOf(n) > -1; });
+        if (shares) rel.push(el);
+      });
+    }
+    paint(selEl, rel);
+    chipEls.forEach(function(c){ c.classList.remove("is-sel"); c.setAttribute("aria-pressed","false"); });
+
+    dKicker.textContent = data.k;
+    dTitle.textContent = data.t;
+    dWhat.textContent = data.w;
+    dNote.textContent = data.note;
+
+    dFiles.textContent = "";
+    if (data.f.length){
+      data.f.forEach(function(n){ if (F[n]) dFiles.appendChild(fileCard(n)); });
+      var gs = {};
+      data.f.forEach(function(n){ if (F[n]) gs[F[n].g] = true; });
+      var list = Object.keys(gs).map(function(g){ return "group " + g + " (" + GROUPS[g].name + ")"; });
+      dWhere.textContent = data.f.length + (data.f.length === 1 ? " file, from " : " files, from ") + list.join(", ") + ".";
+    } else {
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.textContent = "No files here — this part is outside the code you wrote.";
+      dFiles.appendChild(e);
+      dWhere.textContent = "";
+    }
+    openDrawer();
+    reveal(selEl);
+  }
+
+  function showGroup(n){
+    var g = GROUPS[n];
+    var files = GFILES[n] || [];
+
+    var rel = [];
+    blockEls.forEach(function(el){
+      var data = B[el.getAttribute("data-block")];
+      if (!data) return;
+      var hit = data.f.some(function(name){ return F[name] && String(F[name].g) === String(n); });
+      if (hit) rel.push(el);
+    });
+    paint(null, rel);
+    chipEls.forEach(function(c){
+      var on = c.getAttribute("data-group") === String(n);
+      c.classList.toggle("is-sel", on);
+      c.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+
+    dKicker.textContent = "Group " + n + " · " + g.session;
+    dTitle.textContent = g.name;
+    dWhat.textContent = files.length + (files.length === 1 ? " file" : " files");
+
+    if (rel.length){
+      var names = rel.map(function(el){ return B[el.getAttribute("data-block")].t; });
+      dNote.textContent = "Highlighted above: " + names.join(", ") + ".";
+    } else if (String(n) === "10"){
+      dNote.textContent = "These do not sit on any one block — they check the whole backend. Most of them exist because something broke in production once, and two are named after real incidents you fixed.";
+    } else {
+      dNote.textContent = "These do not sit on any one block. They describe the project or tell the host how to run it.";
+    }
+
+    dFiles.textContent = "";
+    files.forEach(function(name){ dFiles.appendChild(fileCard(name)); });
+    dWhere.textContent = "";
+    openDrawer();
+  }
+
+  function clearAll(){
+    lanes.classList.remove("armed");
+    blockEls.forEach(function(el){
+      el.classList.remove("is-sel","is-rel");
+      el.setAttribute("aria-pressed","false");
+    });
+    chipEls.forEach(function(c){ c.classList.remove("is-sel"); c.setAttribute("aria-pressed","false"); });
+    drawer.hidden = true;
+    document.body.classList.remove("drawer-open");
+  }
+
+  blockEls.forEach(function(el){
+    el.addEventListener("click", function(){
+      var id = el.getAttribute("data-block");
+      if (el.classList.contains("is-sel")) { clearAll(); return; }
+      showBlock(id);
+    });
+  });
+
+  chipEls.forEach(function(c){
+    c.addEventListener("click", function(){
+      var n = c.getAttribute("data-group");
+      if (c.classList.contains("is-sel")) { clearAll(); return; }
+      showGroup(n);
+    });
+  });
+
+  document.getElementById("dClose").addEventListener("click", clearAll);
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape") clearAll();
+  });
+})();
+</script>
+
+</body></html>

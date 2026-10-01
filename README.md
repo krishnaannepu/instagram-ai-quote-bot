@@ -6,6 +6,8 @@ Sheets, saves leads, emails quotes, and hands off to a human on request.
 
 Live on Cloud Run as `instagram-ai-quote-bot` (europe-west2).
 
+![System overview: customer DMs Instagram, Gemini extracts the details, Python prices it with business rules, a quote goes back to the customer](docs/system-infographic.png)
+
 ---
 
 ## The rule the whole design rests on
@@ -28,6 +30,12 @@ look there first.
 
 For a file-by-file walkthrough of what each module does and how they
 connect, see **[ARCHITECTURE.md](ARCHITECTURE.md)**.
+
+For an interactive, click-through version of the architecture, open
+**[how-it-works.html](how-it-works.html)** in a browser.
+
+For a visual map that shows exactly which files sit behind each part of
+the system - click any block to see them - open **[code-map.html](code-map.html)**.
 
 Everything in the root is reachable from `main.py` or is part of the test gate.
 Anything unreachable lives in `archive/`.
